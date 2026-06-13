@@ -9,6 +9,7 @@ import BurnoutRadar from '@/components/dashboard/BurnoutRadar';
 import MentalDNA from '@/components/dashboard/MentalDNA';
 import ActionPlan from '@/components/dashboard/ActionPlan';
 import DailyCheckInForm from '@/components/dashboard/DailyCheckInForm';
+import MomBestFriend from '@/components/dashboard/MomBestFriend';
 import { getInterventionForStudent } from '@/lib/mockData';
 import { Activity, Sparkles, MessageSquare, Compass, ShieldAlert, Award, RefreshCw, AlertCircle, Gamepad2, Smile, Brain } from 'lucide-react';
 import Link from 'next/link';
@@ -157,13 +158,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Grid 1: Fitness Score & Today's AI Insight */}
+      {/* Grid 1: Fitness Score, Today's AI Insight & Mom/Friend Comfort */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <FitnessScore history={history} />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-1">
           <TodayInsight latestEntry={latestEntry} />
+        </div>
+        <div className="lg:col-span-1">
+          <MomBestFriend latestEntry={latestEntry} />
         </div>
       </div>
 
