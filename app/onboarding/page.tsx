@@ -227,10 +227,11 @@ export default function OnboardingPage() {
  
                 {/* Student Name Input */}
                 <div className="space-y-2 mt-6 text-left">
-                  <label className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
+                  <label htmlFor="student-name-input" className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">
                     What is your name, Pilot?
                   </label>
                   <input
+                    id="student-name-input"
                     type="text"
                     required
                     placeholder="e.g. Bhavesh, Rahul..."

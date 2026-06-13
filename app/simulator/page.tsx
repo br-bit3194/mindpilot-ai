@@ -5,6 +5,7 @@ import { useStudentData } from '@/hooks/useStudentData';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from 'recharts';
 import { Compass, Sparkles, RefreshCw, AlertTriangle, ArrowUpRight, CheckCircle2, ShieldAlert, BookOpen, Brain, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { calculateROIMetrics } from '@/lib/metrics';
  
 export default function SimulatorPage() {
   const { history, loading } = useStudentData();
@@ -29,48 +30,7 @@ export default function SimulatorPage() {
  
   // Core ROI calculations
   const roiMetrics = React.useMemo(() => {
-    let base = 100;
- 
-    // Sleep penalty
-    let sleepPenalty = 0;
-    if (sleep >= 7.5) sleepPenalty = 0;
-    else if (sleep >= 6.5) sleepPenalty = -15;
-    else if (sleep >= 5.5) sleepPenalty = -35;
-    else sleepPenalty = -55; // severe sleep debt
- 
-    // Stress penalty
-    let stressPenalty = 0;
-    if (stress <= 3) stressPenalty = 0;
-    else if (stress <= 6) stressPenalty = -10;
-    else if (stress <= 8) stressPenalty = -25;
-    else stressPenalty = -45; // extreme cortisol overload
- 
-    // Review bonus/penalty
-    let reviewAdjustment = 0;
-    if (reviewStyle === 'none') reviewAdjustment = -15;
-    else if (reviewStyle === 'skim') reviewAdjustment = 0;
-    else reviewAdjustment = 10;
- 
-    const retention = Math.max(15, Math.min(98, base + sleepPenalty + stressPenalty + reviewAdjustment));
-    
-    // Effective hours
-    const effectiveHours = (scheduledHours * retention) / 100;
-    const wastedHours = scheduledHours - effectiveHours;
- 
-    // Weekly marks loss simulation (silly errors due to sleep debt + unresolved concepts)
-    const sleepDebt = Math.max(0, 7.5 - sleep);
-    const weeklyMarksWasted = Math.round(
-      (wastedHours * 1.5) + 
-      (sleepDebt * 8) + 
-      (reviewStyle === 'none' ? 18 : reviewStyle === 'skim' ? 6 : 0)
-    );
- 
-    return {
-      retention,
-      effectiveHours,
-      wastedHours,
-      weeklyMarksWasted
-    };
+    return calculateROIMetrics(scheduledHours, sleep, stress, reviewStyle);
   }, [scheduledHours, sleep, stress, reviewStyle]);
  
   // Scenario comparisons for the chart

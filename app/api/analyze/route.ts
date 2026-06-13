@@ -24,6 +24,7 @@ const AssessmentSchema = z.object({
 });
 
 const ProfileSchema = z.object({
+  name: z.string().optional().default('Pilot'),
   academic: AcademicSchema,
   lifestyle: LifestyleSchema,
   assessment: AssessmentSchema,

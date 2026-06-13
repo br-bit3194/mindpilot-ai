@@ -241,10 +241,11 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   {/* Log Date */}
                   <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                    <label htmlFor="checkin-date" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
                       Log Date
                     </label>
                     <input 
+                      id="checkin-date"
                       type="date" 
                       value={logDate}
                       onChange={(e) => setLogDate(e.target.value)}
@@ -255,10 +256,11 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
 
                   {/* Sleep Hours */}
                   <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                    <label htmlFor="checkin-sleep" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
                       Sleep Hours
                     </label>
                     <input 
+                      id="checkin-sleep"
                       type="number" 
                       step="0.5" 
                       min="0" 
@@ -272,10 +274,11 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
 
                   {/* Study Hours */}
                   <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                    <label htmlFor="checkin-study" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
                       Study Hours
                     </label>
                     <input 
+                      id="checkin-study"
                       type="number" 
                       step="0.5" 
                       min="0" 
@@ -289,10 +292,11 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
 
                   {/* Mock Score (Optional) */}
                   <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                    <label htmlFor="checkin-mock-score" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
                       Mock Score (Optional)
                     </label>
                     <input 
+                      id="checkin-mock-score"
                       type="number" 
                       placeholder="e.g. 210"
                       value={mockScore}
@@ -305,7 +309,7 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                 {/* Journal & Audio */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                    <label htmlFor="checkin-journal" className="text-xs font-bold uppercase tracking-wider text-text-muted">
                       Open Journal / Mental Logs
                     </label>
                     
@@ -334,6 +338,7 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                   </div>
                   
                   <textarea
+                    id="checkin-journal"
                     rows={4}
                     placeholder="Describe how your preparation went today. Are you struggling with backlogs? Is there mock test anxiety or parental pressure? Feel free to vent, MindPilot is secure and private..."
                     value={journalEntry}

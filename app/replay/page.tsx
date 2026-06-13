@@ -5,6 +5,7 @@ import { useStudentData } from '@/hooks/useStudentData';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Calendar, Award, TrendingUp, Sparkles, RefreshCw, ChevronRight, Activity, Moon, Zap, ShieldAlert, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { calculateCalibrationScore } from '@/lib/metrics';
  
 export default function ReplayPage() {
   const { history, loading, resetToDemoMode } = useStudentData();
@@ -23,33 +24,7 @@ export default function ReplayPage() {
  
   // Calculate Schedule Calibration rules
   const calibrationResult = React.useMemo(() => {
-    let score = 100;
-    const tips: string[] = [];
- 
-    if (eveningSlot === 'high-focus') {
-      score -= 30;
-      tips.push("⚠️ High-Focus (Physics/Math) in the evening stimulates brainwaves past wind-down times, inducing sleep debt.");
-    }
- 
-    if (morningSlot === 'active-reset' || morningSlot === 'practice') {
-      score -= 20;
-      tips.push("⚠️ Morning slot is peak focus window. Use it for heavy concept absorption, not practice or reset.");
-    }
- 
-    const hasReset = [morningSlot, afternoonSlot, lateAfternoonSlot, eveningSlot].includes('active-reset');
-    if (!hasReset) {
-      score -= 20;
-      tips.push("⚠️ No active resets scheduled. Continuous study leads to focus fatigue. Dedicate at least one slot to breathing / games.");
-    }
- 
-    if (eveningSlot === 'active-reset' && morningSlot === 'high-focus' && score >= 90) {
-      tips.push("✓ Circadian Sync: Morning high focus utilizes peak focus, and evening active reset prepares your neural core for deep sleep.");
-    }
- 
-    return {
-      score: Math.max(10, score),
-      tips
-    };
+    return calculateCalibrationScore(morningSlot, afternoonSlot, lateAfternoonSlot, eveningSlot);
   }, [morningSlot, afternoonSlot, lateAfternoonSlot, eveningSlot]);
  
   if (loading) {
