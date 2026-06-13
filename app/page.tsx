@@ -10,6 +10,7 @@ import MentalDNA from '@/components/dashboard/MentalDNA';
 import ActionPlan from '@/components/dashboard/ActionPlan';
 import DailyCheckInForm from '@/components/dashboard/DailyCheckInForm';
 import MomBestFriend from '@/components/dashboard/MomBestFriend';
+import StartupFeatures from '@/components/dashboard/StartupFeatures';
 import { getInterventionForStudent } from '@/lib/mockData';
 import { Activity, Sparkles, MessageSquare, Compass, ShieldAlert, Award, RefreshCw, AlertCircle, Gamepad2, Smile, Brain } from 'lucide-react';
 import Link from 'next/link';
@@ -197,47 +198,12 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* AI Companion Sidebar */}
+        {/* Startup Metrics & Parent Reassurance Report */}
         <div className="lg:col-span-1">
-          <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between h-full">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                  <MessageSquare size={20} className="text-primary" />
-                  AI Resilience Companion
-                </h2>
-                <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
-              </div>
-              <p className="text-xs text-text-muted mb-4 leading-relaxed">
-                Need to talk? Your empathetic co-pilot understands your Mental DNA and exam stressors. Tell it about your Physics load, parent worries, or test panics.
-              </p>
-              
-              {/* Quick Prompts */}
-              <div className="space-y-2 mb-4">
-                <Link 
-                  href="/companion?prompt=How do I talk to my parents about my mock score drop?"
-                  className="block text-left text-xs bg-white/5 border border-card-border p-2.5 rounded-lg text-text-muted hover:text-foreground hover:bg-white/10 transition-all outline-none focus:ring-1 focus:ring-primary"
-                >
-                  "How do I talk to parents about mock score drops?"
-                </Link>
-                <Link 
-                  href="/companion?prompt=I am feeling completely overwhelmed with Physics backlog."
-                  className="block text-left text-xs bg-white/5 border border-card-border p-2.5 rounded-lg text-text-muted hover:text-foreground hover:bg-white/10 transition-all outline-none focus:ring-1 focus:ring-primary"
-                >
-                  "I am overwhelmed with Physics backlog."
-                </Link>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-card-border">
-              <Link
-                href="/companion"
-                className="w-full bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary font-bold text-center block py-2.5 rounded-xl text-xs transition-all focus:ring-2 focus:ring-primary outline-none"
-              >
-                Launch Empathetic Chat Room
-              </Link>
-            </div>
-          </div>
+          <StartupFeatures 
+            latestEntry={latestEntry}
+            profile={profile}
+          />
         </div>
       </div>
 
