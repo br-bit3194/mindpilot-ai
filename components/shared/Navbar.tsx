@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccessibility } from './ClientShell';
-import { Sun, Moon, Eye, Type, BrainCircuit, MessageSquare, Compass, ShieldAlert, Calendar } from 'lucide-react';
+import { Sun, Moon, Eye, Type, BrainCircuit, MessageSquare, Compass, ShieldAlert, Calendar, Gamepad2 } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,6 +14,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/', icon: BrainCircuit },
     { name: 'Onboarding', path: '/onboarding', icon: Calendar },
     { name: 'AI Companion', path: '/companion', icon: MessageSquare },
+    { name: 'Relax Room', path: '/relax', icon: Gamepad2 },
     { name: 'Future Self', path: '/simulator', icon: Compass },
     { name: 'Weekly Replay', path: '/replay', icon: Calendar },
   ];
