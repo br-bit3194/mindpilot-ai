@@ -5,6 +5,7 @@ import { DailyCheckIn, StudentProfile } from '../lib/types';
 
 describe('MindPilot AI Resilience Calculations', () => {
   const mockProfile: StudentProfile = {
+    name: 'Test Pilot',
     academic: {
       examType: 'JEE',
       targetScore: '280',

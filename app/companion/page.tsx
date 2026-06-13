@@ -23,7 +23,7 @@ function ChatInterface() {
   useEffect(() => {
     if (loading || !profile) return;
     
-    const welcomeText = `Hello! I am your MindPilot Mental Resilience Co-Pilot. I am analyzing your academic parameters for ${profile.academic.examType}. I see that you've been working on managing ${mentalDNA?.primaryStressors.join(', ') || 'stressors'}. How are you feeling today? Tell me about your study blocks, mock exams, or parent discussions.`;
+    const welcomeText = `Hey ${profile.name}! 🤗 I'm your MindPilot Resilience Co-Pilot, but you can think of me as your best friend and second mom here to support you. I know studying for ${profile.academic.examType} gets super tough and backlogs feel heavy, but we're in this together. How are you feeling today? Did you sleep well and have a good meal? Let's chat!`;
     
     setMessages([
       {

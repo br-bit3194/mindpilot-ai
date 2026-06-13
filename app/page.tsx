@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
 import FitnessScore from '@/components/dashboard/FitnessScore';
 import TodayInsight from '@/components/dashboard/TodayInsight';
@@ -12,8 +13,9 @@ import DailyCheckInForm from '@/components/dashboard/DailyCheckInForm';
 import MomBestFriend from '@/components/dashboard/MomBestFriend';
 import StartupFeatures from '@/components/dashboard/StartupFeatures';
 import { getInterventionForStudent } from '@/lib/mockData';
-import { Activity, Sparkles, MessageSquare, Compass, ShieldAlert, Award, RefreshCw, AlertCircle, Gamepad2, Smile, Brain } from 'lucide-react';
+import { Activity, Sparkles, MessageSquare, Compass, ShieldAlert, Award, RefreshCw, AlertCircle, Gamepad2, Smile, Brain, Trophy } from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DashboardPage() {
   const {
@@ -21,11 +23,24 @@ export default function DashboardPage() {
     mentalDNA,
     history,
     completedActions,
+    resilienceXP,
+    resilienceLevel,
+    levelProgress,
+    showLevelUp,
+    dismissLevelUp,
     loading,
     addCheckIn,
     toggleActionCompletion,
     resetToDemoMode,
   } = useStudentData();
+ 
+  const router = useRouter();
+ 
+  useEffect(() => {
+    if (!loading && (!profile || !mentalDNA)) {
+      router.push('/onboarding');
+    }
+  }, [loading, profile, mentalDNA, router]);
 
   if (loading || !profile || !mentalDNA) {
     return (
@@ -109,7 +124,7 @@ export default function DashboardPage() {
         <div className="flex-1 space-y-4 text-center lg:text-left">
           <div>
             <h1 className="text-xl md:text-2xl font-black text-foreground flex items-center justify-center lg:justify-start gap-2">
-              Pilot Status Report
+              Welcome back, {profile.name}! 🚀
               <span className="text-xs text-text-muted font-bold">
                 {profile.academic.examType} Prep
               </span>
@@ -117,6 +132,25 @@ export default function DashboardPage() {
             <p className="text-xs text-text-muted mt-0.5">
               Target Score: <strong className="text-foreground">{profile.academic.targetScore}</strong> • {diffDays} days remaining to exam day.
             </p>
+            {/* Gamification Rank & XP Progress Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3 bg-white/5 p-3 rounded-xl border border-card-border/80">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-black uppercase text-secondary tracking-wider flex items-center gap-1">
+                  <Trophy size={12} className="text-warning animate-pulse" />
+                  Pilot Rank {resilienceLevel}
+                </span>
+                <span className="text-[10px] text-text-muted flex items-center">({resilienceXP} XP total)</span>
+              </div>
+              <div className="flex-1 bg-white/10 h-2 rounded-full overflow-hidden relative">
+                <div 
+                  className="bg-gradient-to-r from-secondary to-primary h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${levelProgress}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-text-muted shrink-0">
+                {levelProgress}/100 XP to Level {resilienceLevel + 1}
+              </span>
+            </div>
           </div>
 
           <div className="bg-white/5 border border-card-border p-4 rounded-2xl relative">
@@ -253,6 +287,82 @@ export default function DashboardPage() {
           </div>
         </Link>
       </div>
+
+      {/* Level Up Celebration Modal */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="levelup-title"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-slate-900 border-2 border-secondary/40 rounded-3xl p-6 md:p-8 max-w-md w-full text-center relative overflow-hidden shadow-[0_0_50px_rgba(168,85,247,0.3)]"
+            >
+              {/* Confetti particles */}
+              <div className="absolute inset-0 pointer-events-none opacity-20">
+                <div className="absolute top-10 left-10 w-2 h-2 bg-primary rounded-full animate-ping" />
+                <div className="absolute top-20 right-10 w-3.5 h-3.5 bg-secondary rounded-full animate-pulse" />
+                <div className="absolute bottom-10 left-20 w-3 h-3 bg-accent rounded-full animate-bounce" />
+                <div className="absolute bottom-20 right-20 w-2.5 h-2.5 bg-success rounded-full animate-pulse" />
+              </div>
+
+              {/* Glowing Level Ring */}
+              <div className="relative w-28 h-28 mx-auto mb-6 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border border-secondary/30 animate-spin [animation-duration:10s]" />
+                <div className="absolute inset-2 rounded-full border border-dashed border-primary/40 animate-spin [animation-duration:6s] [animation-direction:reverse]" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-secondary to-primary flex flex-col items-center justify-center text-white font-black shadow-lg shadow-secondary/25">
+                  <span className="text-[10px] uppercase tracking-widest font-black opacity-85">Level</span>
+                  <span className="text-3xl leading-none">{resilienceLevel}</span>
+                </div>
+              </div>
+
+              <h2 id="levelup-title" className="text-2xl font-black text-foreground flex items-center justify-center gap-2">
+                <Trophy className="text-secondary animate-bounce" size={24} />
+                Pilot Rank Upgraded!
+              </h2>
+              
+              <p className="text-xs text-text-muted mt-2 max-w-sm mx-auto leading-relaxed">
+                Awesome work! Your consistency in tracking your stress and completing your mental resilience actions has powered up your focus core.
+              </p>
+
+              {/* Reward Badge details */}
+              <div className="bg-white/5 border border-card-border rounded-2xl p-4 my-6 text-xs text-left space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-secondary/15 flex items-center justify-center text-secondary font-black">⭐</span>
+                  <div>
+                    <span className="font-bold text-foreground block">Resilience XP Level: {resilienceLevel}</span>
+                    <span className="text-text-muted text-[10px] block">Rank: Master Focus Pilot</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center text-success font-black">🥣</span>
+                  <div>
+                    <span className="font-bold text-foreground block">Motherly Reward Unlocked</span>
+                    <span className="text-text-muted text-[10px] block">Mom says: "I've cooked your favorite kheer. Take a break!"</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={dismissLevelUp}
+                  className="w-full bg-gradient-to-r from-secondary to-primary hover:opacity-95 text-white font-black py-3 rounded-xl shadow-md transition-all focus:ring-2 focus:ring-secondary outline-none cursor-pointer text-xs"
+                >
+                  Receive Mom's Hug & Continue 🤗
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

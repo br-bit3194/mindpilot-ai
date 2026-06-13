@@ -1,21 +1,21 @@
 'use client';
-
+ 
 import React, { useState, useEffect } from 'react';
 import { useStudentData } from '@/hooks/useStudentData';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Compass, Sparkles, RefreshCw, AlertTriangle, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from 'recharts';
+import { Compass, Sparkles, RefreshCw, AlertTriangle, ArrowUpRight, CheckCircle2, ShieldAlert, BookOpen, Brain, Zap } from 'lucide-react';
 import Link from 'next/link';
-
+ 
 export default function SimulatorPage() {
   const { history, loading } = useStudentData();
-
-  // Slider State (default to typical averages)
-  const [sleep, setSleep] = useState(6);
+ 
+  // Slider & Button States
+  const [scheduledHours, setScheduledHours] = useState(10);
+  const [sleep, setSleep] = useState(6.5);
   const [stress, setStress] = useState(6);
-  const [consistency, setConsistency] = useState(75);
-  const [confidence, setConfidence] = useState(50);
+  const [reviewStyle, setReviewStyle] = useState<'none' | 'skim' | 'deep'>('skim');
   const [mounted, setMounted] = useState(false);
-
+ 
   // Initialize sliders with user's latest actual data if available
   useEffect(() => {
     setMounted(true);
@@ -23,98 +23,162 @@ export default function SimulatorPage() {
       const latest = history[history.length - 1];
       setSleep(latest.checkIn.sleepHours);
       setStress(latest.checkIn.stressLevel);
-      setConfidence(latest.analysis.confidence);
+      setScheduledHours(latest.checkIn.studyHours);
     }
   }, [history]);
-
-  // Generate projection coordinates
-  const projectionData = React.useMemo(() => {
-    const data = [];
+ 
+  // Core ROI calculations
+  const roiMetrics = React.useMemo(() => {
+    let base = 100;
+ 
+    // Sleep penalty
+    let sleepPenalty = 0;
+    if (sleep >= 7.5) sleepPenalty = 0;
+    else if (sleep >= 6.5) sleepPenalty = -15;
+    else if (sleep >= 5.5) sleepPenalty = -35;
+    else sleepPenalty = -55; // severe sleep debt
+ 
+    // Stress penalty
+    let stressPenalty = 0;
+    if (stress <= 3) stressPenalty = 0;
+    else if (stress <= 6) stressPenalty = -10;
+    else if (stress <= 8) stressPenalty = -25;
+    else stressPenalty = -45; // extreme cortisol overload
+ 
+    // Review bonus/penalty
+    let reviewAdjustment = 0;
+    if (reviewStyle === 'none') reviewAdjustment = -15;
+    else if (reviewStyle === 'skim') reviewAdjustment = 0;
+    else reviewAdjustment = 10;
+ 
+    const retention = Math.max(15, Math.min(98, base + sleepPenalty + stressPenalty + reviewAdjustment));
     
-    // Base starting score calculated from current sliders
-    const currentBase = Math.round(
-      (10 - stress) * 10 * 0.25 + 
-      Math.min(100, (sleep / 7.5) * 100) * 0.20 + 
-      confidence * 0.30 + 
-      consistency * 0.25
+    // Effective hours
+    const effectiveHours = (scheduledHours * retention) / 100;
+    const wastedHours = scheduledHours - effectiveHours;
+ 
+    // Weekly marks loss simulation (silly errors due to sleep debt + unresolved concepts)
+    const sleepDebt = Math.max(0, 7.5 - sleep);
+    const weeklyMarksWasted = Math.round(
+      (wastedHours * 1.5) + 
+      (sleepDebt * 8) + 
+      (reviewStyle === 'none' ? 18 : reviewStyle === 'skim' ? 6 : 0)
     );
-
-    // Week 0 (Current State)
-    data.push({
-      name: 'Now',
-      'Current Path': currentBase,
-      'Improved Path': currentBase,
-      'Risk Path': currentBase,
-    });
-
-    // Week 1 to 4 projections
-    for (let w = 1; w <= 4; w++) {
-      // Current path changes slightly depending on parameters
-      let currentSlope = (sleep >= 7 ? 2 : -1.5) + (stress <= 5 ? 1.5 : -2) + (consistency >= 80 ? 2.5 : -1);
-      let currentVal = Math.round(currentBase + currentSlope * w);
-      currentVal = Math.max(10, Math.min(98, currentVal));
-
-      // Improved path assumes student reduces stress, improves sleep, and increases consistency
-      let improvedVal = Math.round(currentBase + (4.5 + (8 - stress) * 0.5 + (sleep - 5) * 0.8) * w);
-      improvedVal = Math.max(currentBase, Math.min(96, improvedVal));
-
-      // Risk path assumes continued sleep deprivation, high stress, and drop in consistency/confidence
-      let riskSlope = -5 - (stress * 0.6) - (7.5 - sleep) * 1.2;
-      let riskVal = Math.round(currentBase + riskSlope * w);
-      riskVal = Math.max(12, Math.min(currentBase, riskVal));
-
-      data.push({
-        name: `Week ${w}`,
-        'Current Path': currentVal,
-        'Improved Path': improvedVal,
-        'Risk Path': riskVal,
-      });
-    }
-
-    return data;
-  }, [sleep, stress, consistency, confidence]);
-
+ 
+    return {
+      retention,
+      effectiveHours,
+      wastedHours,
+      weeklyMarksWasted
+    };
+  }, [scheduledHours, sleep, stress, reviewStyle]);
+ 
+  // Scenario comparisons for the chart
+  const comparisonData = React.useMemo(() => {
+    // 1. Burnout Path (Cramming)
+    const burnoutRetention = 35; // Sleep 5 hrs, Stress 9, No review
+    const burnoutScheduled = 14;
+    const burnoutEffective = (burnoutScheduled * burnoutRetention) / 100;
+ 
+    // 2. Current Path (From Sliders)
+    const currentScheduled = scheduledHours;
+    const currentEffective = roiMetrics.effectiveHours;
+ 
+    // 3. Calibrated Path (Optimal balance)
+    const optimalRetention = 95; // Sleep 8 hrs, Stress 2, Deep review
+    const optimalScheduled = 8.5;
+    const optimalEffective = (optimalScheduled * optimalRetention) / 100;
+ 
+    return [
+      {
+        name: 'Burnout (Cramming)',
+        'Scheduled Hours': burnoutScheduled,
+        'Effective Hours (ROI)': Math.round(burnoutEffective * 10) / 10,
+        color: '#ef4444'
+      },
+      {
+        name: 'Your Current Model',
+        'Scheduled Hours': currentScheduled,
+        'Effective Hours (ROI)': Math.round(currentEffective * 10) / 10,
+        color: '#6366f1'
+      },
+      {
+        name: 'Resilient (Calibrated)',
+        'Scheduled Hours': optimalScheduled,
+        'Effective Hours (ROI)': Math.round(optimalEffective * 10) / 10,
+        color: '#10b981'
+      }
+    ];
+  }, [scheduledHours, roiMetrics]);
+ 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[70vh]">
         <div className="flex flex-col items-center gap-2">
           <RefreshCw className="animate-spin text-primary" size={32} />
-          <p className="text-sm text-text-muted font-medium">Bootstrapping simulation matrix...</p>
+          <p className="text-sm text-text-muted font-medium">Bootstrapping cognitive simulation...</p>
         </div>
       </div>
     );
   }
-
-  const latestProjectedFitness = projectionData[4]['Current Path'];
-
+ 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300" role="main" aria-label="Future Self Simulator Page">
+    <div className="space-y-6 animate-in fade-in duration-300" role="main" aria-label="Study ROI Calculator Page">
       {/* Page Header */}
-      <div className="bg-white/5 border border-card-border p-5 rounded-2xl">
-        <h1 className="text-xl md:text-2xl font-black text-foreground flex items-center gap-2">
-          <Compass size={24} className="text-accent" />
-          Future Self Simulator
-        </h1>
-        <p className="text-xs text-text-muted mt-1 leading-relaxed">
-          Model how adjustments in sleep, consistency, and stress triggers affect your Mental Fitness trajectory over a 4-week timeline.
-        </p>
+      <div className="bg-white/5 border border-card-border p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-black text-foreground flex items-center gap-2">
+            <Compass size={24} className="text-accent" />
+            Study ROI & Efficiency Loss Calculator
+          </h1>
+          <p className="text-xs text-text-muted mt-1 leading-relaxed">
+            Discover your true study efficiency. High scheduled hours mean nothing if sleep debt and stress trigger severe cognitive decay.
+          </p>
+        </div>
+        <Link
+          href="/"
+          className="bg-slate-800 hover:bg-slate-700 text-foreground font-bold text-xs px-4 py-2 rounded-xl border border-card-border transition-all focus:ring-2 focus:ring-primary outline-none"
+        >
+          Return to Dashboard
+        </Link>
       </div>
-
-      {/* Control panel and Charts Grid */}
+ 
+      {/* Sliders and Visual Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Interactive Sliders */}
+        {/* Left Column: Sliders */}
         <div className="lg:col-span-1 glass-panel rounded-2xl p-6 space-y-6">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-accent flex items-center gap-2">
             <Sparkles size={16} />
-            Simulator Parameters
+            Input Study Profile
           </h2>
-
+ 
           <div className="space-y-5">
+            {/* Scheduled Hours Slider */}
+            <div>
+              <div className="flex justify-between items-center text-xs font-semibold mb-2">
+                <span className="text-text-muted">Scheduled Daily Study</span>
+                <span className="text-primary font-bold">{scheduledHours} Hours</span>
+              </div>
+              <input 
+                type="range" 
+                min="4" 
+                max="16" 
+                step="0.5"
+                value={scheduledHours}
+                onChange={(e) => setScheduledHours(parseFloat(e.target.value))}
+                className="w-full accent-primary bg-slate-800 h-1.5 rounded"
+                aria-label="Daily scheduled study hours slider"
+              />
+              <span className="text-[10px] text-text-muted mt-1 block">
+                Total hours you sit at your study desk.
+              </span>
+            </div>
+ 
             {/* Sleep Slider */}
             <div>
               <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                <span className="text-text-muted">Sleep Target</span>
-                <span className="text-primary font-bold">{sleep} Hours/Night</span>
+                <span className="text-text-muted">Sleep Duration</span>
+                <span className="text-secondary font-bold">{sleep} Hours/Night</span>
               </div>
               <input 
                 type="range" 
@@ -123,19 +187,19 @@ export default function SimulatorPage() {
                 step="0.5"
                 value={sleep}
                 onChange={(e) => setSleep(parseFloat(e.target.value))}
-                className="w-full accent-primary bg-slate-800 h-1.5 rounded"
-                aria-label="Target sleep hours slider"
+                className="w-full accent-secondary bg-slate-800 h-1.5 rounded"
+                aria-label="Sleep hours slider"
               />
               <span className="text-[10px] text-text-muted mt-1 block">
-                {sleep < 6 ? '⚠️ Deprives cognitive consolidation' : '✓ Promotes mental reset'}
+                {sleep < 6 ? '⚠️ Severe sleep debt triggers brain fog' : '✓ Consolidates memory and formulas'}
               </span>
             </div>
-
+ 
             {/* Stress Slider */}
             <div>
               <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                <span className="text-text-muted">Stress Load</span>
-                <span className="text-secondary font-bold">Level {stress}/10</span>
+                <span className="text-text-muted">Anxiety & Stress Load</span>
+                <span className="text-error font-bold">Level {stress}/10</span>
               </div>
               <input 
                 type="range" 
@@ -143,155 +207,127 @@ export default function SimulatorPage() {
                 max="10" 
                 value={stress}
                 onChange={(e) => setStress(parseInt(e.target.value))}
-                className="w-full accent-secondary bg-slate-800 h-1.5 rounded"
+                className="w-full accent-error bg-slate-800 h-1.5 rounded"
                 aria-label="Stress level slider"
               />
               <span className="text-[10px] text-text-muted mt-1 block">
-                {stress > 7 ? '⚠️ Triggers adrenaline overload' : '✓ Manageable operational load'}
+                {stress > 7 ? '⚠️ Cortisol block prevents retrieval' : '✓ Manageable, focused energy'}
               </span>
             </div>
-
-            {/* Consistency Slider */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                <span className="text-text-muted">Study Consistency</span>
-                <span className="text-success font-bold">{consistency}% score</span>
+ 
+            {/* Mock Test Review Style */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-text-muted block">Mock Test Review Method</label>
+              <div className="grid grid-cols-3 gap-2" role="group">
+                {(['none', 'skim', 'deep'] as const).map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => setReviewStyle(style)}
+                    className={`py-2 px-2 border rounded-xl text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                      reviewStyle === style
+                        ? 'bg-accent/25 border-accent text-foreground'
+                        : 'bg-white/5 border-card-border text-text-muted hover:bg-white/10'
+                    }`}
+                  >
+                    {style === 'none' ? 'No Review' : style === 'skim' ? 'Skim Errors' : 'Deep Analysis'}
+                  </button>
+                ))}
               </div>
-              <input 
-                type="range" 
-                min="30" 
-                max="100" 
-                value={consistency}
-                onChange={(e) => setConsistency(parseInt(e.target.value))}
-                className="w-full accent-success bg-slate-800 h-1.5 rounded"
-                aria-label="Consistency tracker slider"
-              />
-              <span className="text-[10px] text-text-muted mt-1 block">
-                {consistency < 60 ? '⚠️ Fragmented study rhythm' : '✓ Highly predictable performance'}
+              <span className="text-[10px] text-text-muted block">
+                {reviewStyle === 'none' ? '⚠️ High risk of repeating mistakes' : reviewStyle === 'skim' ? 'Corrects obvious errors' : '✓ Recovers concept marks'}
               </span>
             </div>
-
-            {/* Confidence Slider */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                <span className="text-text-muted">Concept Confidence</span>
-                <span className="text-accent font-bold">{confidence}% index</span>
-              </div>
-              <input 
-                type="range" 
-                min="10" 
-                max="100" 
-                value={confidence}
-                onChange={(e) => setConfidence(parseInt(e.target.value))}
-                className="w-full accent-accent bg-slate-800 h-1.5 rounded"
-                aria-label="Concept confidence slider"
-              />
-              <span className="text-[10px] text-text-muted mt-1 block">
-                {confidence < 40 ? '⚠️ High risk of exam dread' : '✓ Strong concept confidence'}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-xs text-text-muted space-y-2">
-            <span className="font-bold text-foreground block">How the Simulator Works</span>
-            <p className="leading-relaxed">
-              MindPilot projects a rolling trajectory of your mental resilience profile by examining the mathematical relationship between study recovery and cognitive load.
-            </p>
           </div>
         </div>
-
-        {/* Right Column: Chart Trajectories */}
+ 
+        {/* Right Column: Visual Charts & Metrics */}
         <div className="lg:col-span-2 glass-panel rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
-                4-Week Projected Trajectory
-              </h2>
-              <span className="text-xs bg-white/5 border border-card-border px-2 py-0.5 rounded text-text-muted">
-                Weekly Resolution
-              </span>
-            </div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground mb-4">
+              Your Cognitive ROI Analysis
+            </h2>
             
-            {/* Projected summary details */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-white/5 border border-card-border rounded-xl p-3">
-                <span className="text-[9px] text-text-muted uppercase tracking-wider block font-semibold">Projected Path</span>
-                <span className="text-xl font-black text-foreground mt-0.5 block">
-                  {latestProjectedFitness}%
+            {/* Stats grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white/5 border border-card-border rounded-xl p-3.5 text-center">
+                <span className="text-[9px] text-text-muted uppercase tracking-wider block font-bold">Retention rate</span>
+                <span className={`text-xl font-black mt-1 block ${
+                  roiMetrics.retention < 50 ? 'text-error animate-pulse' : roiMetrics.retention < 75 ? 'text-warning' : 'text-success'
+                }`}>
+                  {roiMetrics.retention}%
                 </span>
+                <span className="text-[9px] text-text-muted mt-0.5 block">Brain absorption index</span>
               </div>
-              <div className="bg-success/5 border border-success/15 rounded-xl p-3">
-                <span className="text-[9px] text-success uppercase tracking-wider block font-semibold">Improved Peak</span>
-                <span className="text-xl font-black text-success mt-0.5 block">
-                  {projectionData[4]['Improved Path']}%
+ 
+              <div className="bg-white/5 border border-card-border rounded-xl p-3.5 text-center">
+                <span className="text-[9px] text-text-muted uppercase tracking-wider block font-bold">Effective study</span>
+                <span className="text-xl font-black text-success mt-1 block">
+                  {Math.round(roiMetrics.effectiveHours * 10) / 10} Hrs
                 </span>
+                <span className="text-[9px] text-text-muted mt-0.5 block">Actual study ROI</span>
               </div>
-              <div className="bg-error/5 border border-error/15 rounded-xl p-3">
-                <span className="text-[9px] text-error uppercase tracking-wider block font-semibold">Risk Floor</span>
-                <span className="text-xl font-black text-error mt-0.5 block">
-                  {projectionData[4]['Risk Path']}%
+ 
+              <div className="bg-white/5 border border-card-border rounded-xl p-3.5 text-center">
+                <span className="text-[9px] text-text-muted uppercase tracking-wider block font-bold">Wasted energy</span>
+                <span className="text-xl font-black text-error mt-1 block">
+                  {Math.round(roiMetrics.wastedHours * 10) / 10} Hrs
                 </span>
+                <span className="text-[9px] text-text-muted mt-0.5 block">Wasted in brain fog</span>
+              </div>
+ 
+              <div className="bg-white/5 border border-card-border rounded-xl p-3.5 text-center">
+                <span className="text-[9px] text-text-muted uppercase tracking-wider block font-bold">Weekly Marks Lost</span>
+                <span className="text-xl font-black text-warning mt-1 block">
+                  -{roiMetrics.weeklyMarksWasted} Marks
+                </span>
+                <span className="text-[9px] text-text-muted mt-0.5 block">Due to silly errors</span>
               </div>
             </div>
+ 
+            {/* Bar Chart comparing paths */}
+            <div className="h-72 w-full flex items-center justify-center min-h-[280px] mt-4">
+              {mounted ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
+                    <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px' }}
+                      labelStyle={{ color: 'var(--color-text-muted)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '10px' }} />
+                    <Bar dataKey="Scheduled Hours" fill="#475569" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Effective Hours (ROI)" fill="#6366f1" radius={[4, 4, 0, 0]}>
+                      {comparisonData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <span className="text-xs text-text-muted">Loading study comparisons...</span>
+              )}
+            </div>
           </div>
-
-          {/* Recharts Line Chart */}
-          <div className="h-72 w-full flex items-center justify-center min-h-[280px]">
-            {mounted ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={projectionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
-                  <YAxis domain={[0, 100]} tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px' }}
-                    labelStyle={{ color: 'var(--color-text-muted)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '10px' }} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="Current Path" 
-                    stroke="var(--color-primary)" 
-                    strokeWidth={3} 
-                    activeDot={{ r: 6 }} 
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="Improved Path" 
-                    stroke="var(--color-success)" 
-                    strokeWidth={2} 
-                    strokeDasharray="4 4" 
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="Risk Path" 
-                    stroke="var(--color-error)" 
-                    strokeWidth={2} 
-                    strokeDasharray="4 4" 
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <span className="text-xs text-text-muted">Generating simulator charts...</span>
-            )}
-          </div>
-
-          {/* Warning Messages */}
+ 
+          {/* Explanation Banner */}
           <div className="mt-6 pt-4 border-t border-card-border/40">
-            {latestProjectedFitness < 50 ? (
-              <div className="bg-error/10 border border-error/20 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-error">
-                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+            {roiMetrics.retention < 60 ? (
+              <div className="bg-error/10 border border-error/20 rounded-2xl p-4 flex items-start gap-3 text-xs text-error leading-relaxed">
+                <ShieldAlert size={20} className="shrink-0 mt-0.5 animate-pulse" />
                 <div>
-                  <span className="font-bold">Urgent Action Recommended: </span>
-                  Your simulated trajectory bottoms out below 50%. The combination of poor sleep and high anxiety leads directly to physical exhaustion, backlogs, and mock test drop out. Consider shifting to the <Link href="/calm-room" className="underline font-bold hover:text-white">SOS Calm Room</Link> or executing the Action Plan.
+                  <span className="font-extrabold uppercase tracking-wide block mb-1">Severe Study Leakage Detected</span>
+                  You scheduled <strong className="text-foreground">{scheduledHours} hours</strong> but your brain only captures <strong className="text-foreground">{Math.round(roiMetrics.effectiveHours * 10) / 10} hours</strong>. The remaining time is wasted due to sleep debt and panic. 
+                  <span className="block mt-1 font-bold text-foreground">Action: Increase sleep to 7.5+ hours and decompress in the Calm Room. Less hours at the desk will yield MORE effective absorption.</span>
                 </div>
               </div>
             ) : (
-              <div className="bg-success/10 border border-success/20 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-success">
-                <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+              <div className="bg-success/10 border border-success/20 rounded-2xl p-4 flex items-start gap-3 text-xs text-success leading-relaxed">
+                <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold">Sustainable Pattern: </span>
-                  Your simulated habits are projected to keep your fitness levels stable. Continue maintaining a minimum of 6.5 hours of sleep and limiting peak study bursts to under 12 hours.
+                  <span className="font-extrabold uppercase tracking-wide block mb-1">Healthy Focus Ratio</span>
+                  Your study profile is highly calibrated! You scheduled <strong className="text-foreground">{scheduledHours} hours</strong> and are absorbing <strong className="text-foreground">{Math.round(roiMetrics.effectiveHours * 10) / 10} hours</strong> of information. Your retention is excellent. Keep maintaining sleep and regular mock concept review.
                 </div>
               </div>
             )}

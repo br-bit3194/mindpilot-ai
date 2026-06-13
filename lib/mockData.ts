@@ -1,6 +1,7 @@
 import { StudentProfile, DailyLogEntry, MentalDNA, InterventionPlan } from './types';
 
 export const SEEDED_STUDENT_PROFILE: StudentProfile = {
+  name: 'Bhavesh',
   academic: {
     examType: 'JEE',
     targetScore: '280',

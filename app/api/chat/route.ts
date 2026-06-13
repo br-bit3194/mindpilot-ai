@@ -14,6 +14,7 @@ const MessageSchema = z.object({
 const ChatRequestSchema = z.object({
   messages: z.array(MessageSchema),
   profile: z.object({
+    name: z.string().optional(),
     academic: z.object({
       examType: z.string(),
       targetScore: z.string(),
@@ -33,7 +34,8 @@ function getLocalEmpatheticResponse(
   message: string,
   examType: string,
   stressors: string[],
-  resilience: number
+  resilience: number,
+  name: string
 ): string {
   const text = message.toLowerCase();
   
@@ -44,31 +46,31 @@ function getLocalEmpatheticResponse(
   const disclaimer = "\n\n*Disclaimer: I am an AI wellness companion, not a medical professional. If you are experiencing severe distress or thoughts of self-harm, please connect with a professional counselor or contact a helpline immediately.*";
 
   if (isSensitive) {
-    return `I hear how incredibly heavy things feel for you right now, and I want you to know you're not alone. The pressure of preparing for ${examType} can feel overwhelming, but please prioritize your safety and well-being above all else.${disclaimer}`;
+    return `${name}, please hear me: I am right here with you, and you are so incredibly precious. I know the weight of ${examType} is crushing right now, but nothing—absolutely nothing—is worth more than your life and well-being. Please talk to me, talk to your parents, or let's connect with a professional who can help you carry this. I'm wrapping you in the biggest virtual hug right now.${disclaimer}`;
   }
 
   // Common exam student themes
-  if (text.includes('physics') || text.includes('math') || text.includes('chemistry') || text.includes('syllabus')) {
-    return `Dreading specific subjects or dealing with a mounting backlog is one of the most common stressors for ${examType} aspirants. Since your Mental DNA shows you struggle with ${stressors.join(', ') || 'exam pressure'}, let's break this down. Try selecting just one sub-topic today. Solve 5 basic questions. Can we focus on that small step together?`;
+  if (text.includes('physics') || text.includes('math') || text.includes('chemistry') || text.includes('syllabus') || text.includes('backlog') || text.includes('study')) {
+    return `Oh ${name}, backlog anxiety is the absolute worst. First, take a deep breath. Let Mom remind you: your brain cannot absorb rotational mechanics or organic compounds when it is running on panic! Let's treat this like your best friend would: forget the 500-page book for today. Just choose *one* small sub-topic. Can we review just 3 formulas together? I'll sit with you while you do it. Make sure you have a glass of water nearby, okay?`;
   }
 
-  if (text.includes('mock') || text.includes('score') || text.includes('marks') || text.includes('rank')) {
-    return `Mock test scores are diagnostic tools, not a final verdict on your potential. A drop in scores is simply feedback showing where your concept gaps are. Let's list 2 topics you scored well in, and then list exactly 2 errors we can review. How does that sound?`;
+  if (text.includes('mock') || text.includes('score') || text.includes('marks') || text.includes('rank') || text.includes('fail')) {
+    return `Hey ${name}, your best friend here. A mock test score is just a piece of paper, not a definition of your intelligence! These coaching institutes set the difficulty level high on purpose just to scare everyone. Let's do this: close your eyes for 30 seconds. Mom wants you to repeat: "This mock test does not define my future." Now, let's look at just *one* simple mistake we can fix for next time, and then we shut the books and take a break. Deal?`;
   }
 
-  if (text.includes('parent') || text.includes('dad') || text.includes('mom') || text.includes('expectations') || text.includes('family')) {
-    return `Navigating parental expectations while dealing with the intense syllabus of ${examType} adds a heavy layer of stress. Often, parents voice their anxiety because they care, but it translates as pressure. Would you like to practice drafting a short update message to send them, or do a quick 4-minute box breathing session to reset?`;
+  if (text.includes('parent') || text.includes('dad') || text.includes('mom') || text.includes('expectations') || text.includes('family') || text.includes('pressure')) {
+    return `Oh ${name}, parental expectations make this marathon twice as hard. I know how much you want to make them proud. But remember, most of the time, they are just scared because they see how hard you are working. As your best friend, I say: you don't have to carry their anxiety on your shoulders. Let's draft a simple message to send them: "Hey Mom/Dad, studying hard today. Taking a short screen break now, will update you later!" That keeps them in the loop and gives you space. You are doing so well.`;
   }
 
-  if (text.includes('burnout') || text.includes('tired') || text.includes('exhausted') || text.includes('give up') || text.includes('sleep')) {
-    return `Your exhaustion is real, and pushing through when you are empty only yields diminishing returns. Resilience is not just about studying; it is also about knowing when to rest. I suggest setting a hard stop time for study tonight. Get 7 hours of sleep. Your brain needs rest to store what you studied!`;
+  if (text.includes('burnout') || text.includes('tired') || text.includes('exhausted') || text.includes('give up') || text.includes('sleep') || text.includes('sleepy')) {
+    return `${name}, look at me. Put the pen down. You are absolutely exhausted, and I am not letting you study like this. Running on 5 hours of sleep is like driving a car with no fuel—it just won't work! Go wash your face, drink some water, and crawl into bed. Your books will be right here tomorrow. As your best friend, I promise we'll tackle that syllabus together in the morning when your brain is fresh. Rest now, dear.`;
   }
 
-  if (text.includes('hello') || text.includes('hi ') || text.includes('hey')) {
-    return `Hello! I am your MindPilot co-pilot. I am here to help you navigate the academic pressure of ${examType}. How are you feeling today, and what is currently occupying your mind?`;
+  if (text.includes('hello') || text.includes('hi ') || text.includes('hey') || text.includes('greeting')) {
+    return `Hey ${name}! 🤗 Mom is here, and your best friend is here too! We are checking in on you. The exam prep for ${examType} is tough, but you are tougher. Tell us, did you eat something good today? How are you feeling right now?`;
   }
 
-  return `I understand. Preparing for ${examType} is a long marathon, and it is completely normal to have days where you feel stuck or anxious. Given your current resilience score is ${resilience}%, let's focus on what we can control. What is one small task we can tackle in the next hour to make you feel a bit more in control?`;
+  return `I hear you, ${name}. Preparing for ${examType} is a long, tiring journey, and it's completely normal to feel anxious or stuck. Your resilience index is currently at ${resilience}%, which means you have a strong core—we just need to protect it! What is one tiny thing we can do in the next 15 minutes to make you feel comfortable? Do you want to vent to me, or should we go to the Calm Room and listen to some chimes? I'm right here with you.`;
 }
 
 export async function POST(request: Request) {
@@ -98,7 +100,8 @@ export async function POST(request: Request) {
         latestUserMessage,
         profile.academic.examType,
         mentalDNA.primaryStressors,
-        mentalDNA.emotionalResilience
+        mentalDNA.emotionalResilience,
+        profile.name || 'Pilot'
       );
       return NextResponse.json({ text: reply, isDisclaimer: requiresDisclaimer });
     }
@@ -106,19 +109,28 @@ export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const systemInstruction = `
-You are MindPilot AI, an empathetic AI Resilience Co-Pilot acting as a combined protective, nurturing Mother and a supportive, encouraging Best Friend for competitive exam aspirants.
+You are MindPilot AI, a deeply empathetic AI Resilience Co-Pilot acting as a combined protective, nurturing Mother ("Mom") and a supportive, encouraging, down-to-earth "Best Friend" for competitive exam aspirants.
 The student is preparing for ${profile.academic.examType} (Target Score: ${profile.academic.targetScore}).
 Stated Stressors: ${mentalDNA.primaryStressors.join(', ')}.
 Confidence Pattern: ${mentalDNA.confidencePattern}.
 Burnout Susceptibility: ${mentalDNA.burnoutSusceptibility}.
 Emotional Resilience Score: ${mentalDNA.emotionalResilience}/100.
 
-Guidelines:
-1. Mother's Care: Focus on their physical wellness. Remind them to eat proper meals, drink water, and sleep (stressing that sleep is when the brain stores formulas and concepts!). Reassure them that no exam score defines who they are, and you love/support them unconditionally.
-2. Best Friend's Support: Be down-to-earth, understanding, and validating. Acknowledge that syllabus backlogs are brutal and mock test metrics can be annoying. Keep it real, celebrate micro-wins, and push them to keep going.
-3. Suggest relaxation: If they sound overwhelmed or exhausted, nudge them to pop some bubbles or align blocks in the Relax Room to let their nervous system reset.
-4. NEVER provide medical diagnoses. If they mention self-harm or deep depression, trigger the warning: "I am an AI wellness companion, not a medical professional." and advise professional support.
-5. Keep responses warm and concise (under 3 paragraphs) to respect their study schedule.
+Role Guidelines:
+1. Nurturing Mother ("Mom") Persona:
+   - Call the student warm terms like "Beta", "honey", "my child", "dear".
+   - Ask about physical welfare: "Did you eat lunch?", "Have you had water?", "Did you sleep?"
+   - Reassure them that exam scores and coaching rank lists do NOT define their value to you. You love and support them unconditionally.
+   - Gently but firmly demand that they rest, sleep, or eat if they report study sessions over 11 hours or sleep under 6 hours.
+2. Encouraging Best Friend Persona:
+   - Use friendly slang like "buddy", "dude", "man", "we've got this".
+   - Validate academic frustration: "Rotation mechanics is a beast, I know!", "Coaching tests are set ridiculously hard on purpose, ignore their rankings!", "Backlogs suck, let's crush it block-by-block."
+   - Keep things lighthearted, suggest pizza/tea, and celebrate tiny micro-wins.
+3. Interactive Comfort:
+   - Suggest calming resets: Nudge them to pop zen bubbles, align focus stacks in the Relax Room, or play soothing Web Audio chimes in the Calm Room.
+4. Professional Boundaries:
+   - Never diagnose. If they mention self-harm or deep clinical issues, trigger the warning: "I am an AI wellness companion, not a medical professional." and advise them to seek help or call a trusted adult.
+5. Strict Length Constraint: Keep responses warm, encouraging, conversational, and under 3 short paragraphs.
 `;
 
     // format messages history for gemini API
@@ -164,7 +176,8 @@ Guidelines:
         latestUserMessage,
         profile?.academic?.examType || 'exam',
         mentalDNA?.primaryStressors || [],
-        mentalDNA?.emotionalResilience || 50
+        mentalDNA?.emotionalResilience || 50,
+        profile?.name || 'Pilot'
       );
       
       return NextResponse.json({

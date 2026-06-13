@@ -18,6 +18,7 @@ export interface PsychologicalAssessment {
 }
 
 export interface StudentProfile {
+  name: string;
   academic: AcademicProfile;
   lifestyle: LifestyleProfile;
   assessment: PsychologicalAssessment;

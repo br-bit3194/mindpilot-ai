@@ -4,41 +4,45 @@ import React, { useState } from 'react';
 import { DailyLogEntry } from '@/lib/types';
 import { Heart, Coffee, ShieldAlert, Sparkles, Smile, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useStudentData } from '@/hooks/useStudentData';
 
 interface MomBestFriendProps {
   latestEntry: DailyLogEntry | undefined;
 }
 
 export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
+  const { profile } = useStudentData();
   const [activePersona, setActivePersona] = useState<'mom' | 'friend'>('mom');
   const [interactiveAction, setInteractiveAction] = useState<string | null>(null);
 
   const getMomMessage = () => {
+    const name = profile?.name || 'Beta';
     if (!latestEntry) {
-      return "Beta, please make sure you are eating your meals on time. Take care of yourself first, study later.";
+      return `${name}, please make sure you are eating your meals on time. Take care of yourself first, study later.`;
     }
 
     const { sleepHours, studyHours, mood } = latestEntry.checkIn;
     const triggers = latestEntry.analysis.stressTriggers;
 
     if (sleepHours < 6) {
-      return `Beta, you only slept ${sleepHours} hours! This is not healthy. No exam is more important than your sleep. I am sending you a virtual cup of warm turmeric milk 🥛. Close the books by 10 PM tonight, please. I am proud of your hard work, always.`;
+      return `${name}, you only slept ${sleepHours} hours! This is not healthy. No exam is more important than your sleep. I am sending you a virtual cup of warm turmeric milk 🥛. Close the books by 10 PM tonight, please. I am proud of your hard work, always.`;
     }
 
     if (studyHours > 12) {
-      return `You have been at your study desk for ${studyHours} hours today. That's too much, Beta. Get up right now, stretch, and eat a fruit. Your health and happiness are worth more than any rank list.`;
+      return `You have been at your study desk for ${studyHours} hours today. That's too much, ${name}. Get up right now, stretch, and eat a fruit. Your health and happiness are worth more than any rank list.`;
     }
 
     if (mood === 'anxious' || mood === 'exhausted') {
-      return `I can feel how heavy this preparation is for you. Take a deep breath, Beta. You are my smart child, and one mock test score cannot change that. I love you and I am standing right beside you.`;
+      return `I can feel how heavy this preparation is for you. Take a deep breath, ${name}. You are my smart child, and one mock test score cannot change that. I love you and I am standing right beside you.`;
     }
 
-    return "Beta, you are doing wonderfully. Just make sure to drink water and take small breaks. I am always proud of you.";
+    return `${name}, you are doing wonderfully. Just make sure to drink water and take small breaks. I am always proud of you.`;
   };
 
   const getFriendMessage = () => {
+    const name = profile?.name || 'buddy';
     if (!latestEntry) {
-      return "Hey! Don't stress too much. Let's tackle this exam one day at a time. We've got this!";
+      return `Hey ${name}! Don't stress too much. Let's tackle this exam one day at a time. We've got this!`;
     }
 
     const { mood, studyHours, mockTestScore } = latestEntry.checkIn;
@@ -51,10 +55,10 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
     }
 
     if (mood === 'exhausted') {
-      return `Man, studying for ${studyHours} hours is insane! You're running on empty. Shut down the books, let's play Focus Stacker, and clear our brains. We're in this marathon together, don't burn out now.`;
+      return `${name}, studying for ${studyHours} hours is insane! You're running on empty. Shut down the books, let's play Focus Stacker, and clear our brains. We're in this marathon together, don't burn out now.`;
     }
 
-    return `Physics backlog? Honestly, rotation mechanics is a beast. Don't sweat it too much, we'll break it down into micro-cheat sheets. Let's grab a virtual coffee and conquer it tomorrow. ☕`;
+    return `Hey ${name}, physics backlog? Honestly, rotation mechanics is a beast. Don't sweat it too much, we'll break it down into micro-cheat sheets. Let's grab a virtual coffee and conquer it tomorrow. ☕`;
   };
 
   const triggerAction = (actionType: string) => {
@@ -146,43 +150,51 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
         <span className="text-[10px] text-text-muted uppercase tracking-wider block font-bold text-center">
           Tap for immediate virtual comfort:
         </span>
-        
-        <div className="flex justify-around gap-2">
+        <div className="flex justify-around gap-2 flex-wrap">
           <button
             onClick={() => triggerAction('chai')}
             disabled={interactiveAction !== null}
-            className="flex-1 flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
+            className="flex-1 min-w-[70px] flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
           >
             <Coffee size={16} className="text-warning mb-1" />
-            Drink Chai ☕
+            Ginger Chai ☕
           </button>
           
           <button
             onClick={() => triggerAction('hug')}
             disabled={interactiveAction !== null}
-            className="flex-1 flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
+            className="flex-1 min-w-[70px] flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
           >
             <Heart size={16} className="text-error mb-1 animate-pulse" />
-            Get Warm Hug 🤗
+            Warm Hug 🤗
           </button>
           
           <button
             onClick={() => triggerAction('vent')}
             disabled={interactiveAction !== null}
-            className="flex-1 flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
+            className="flex-1 min-w-[70px] flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
           >
             <MessageCircle size={16} className="text-primary mb-1" />
             High-Five 🖐️
           </button>
-        </div>
 
+          <button
+            onClick={() => triggerAction('blanket')}
+            disabled={interactiveAction !== null}
+            className="flex-1 min-w-[70px] flex flex-col items-center p-2 rounded-xl bg-white/5 border border-card-border hover:bg-white/10 text-[10px] font-bold text-text-muted hover:text-foreground focus:outline-none transition-all cursor-pointer"
+          >
+            <Sparkles size={16} className="text-accent mb-1" />
+            Blanket 🧣
+          </button>
+        </div>
+ 
         {/* Action Animation Layer */}
         <AnimatePresence>
           {interactiveAction && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               className="absolute inset-0 bg-slate-950/95 rounded-3xl flex flex-col items-center justify-center p-6 z-20 text-center border border-secondary/35"
             >
               {interactiveAction === 'chai' && (
@@ -200,7 +212,7 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
                   </span>
                 </>
               )}
-
+ 
               {interactiveAction === 'hug' && (
                 <>
                   <motion.span 
@@ -216,7 +228,7 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
                   </span>
                 </>
               )}
-
+ 
               {interactiveAction === 'vent' && (
                 <>
                   <motion.span 
@@ -229,6 +241,22 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
                   <span className="text-xs text-foreground font-bold block">High Five!</span>
                   <span className="text-[10px] text-text-muted mt-1 max-w-xs leading-relaxed">
                     Best Friend says: "We're going to crack this GATE/JEE syllabus, trust me. Let's crush a round of Zen Pop and get back to it."
+                  </span>
+                </>
+              )}
+
+              {interactiveAction === 'blanket' && (
+                <>
+                  <motion.span 
+                    animate={{ y: [0, 3, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="text-4xl block mb-2"
+                  >
+                    🧣🧸
+                  </motion.span>
+                  <span className="text-xs text-foreground font-bold block">Cozy Blanket!</span>
+                  <span className="text-[10px] text-text-muted mt-1 max-w-xs leading-relaxed">
+                    Mom wrapped you in a warm, cozy fleece blanket. Close your eyes and let your mind drift for a few moments. You are safe and cared for.
                   </span>
                 </>
               )}
