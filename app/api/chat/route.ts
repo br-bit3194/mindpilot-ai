@@ -106,8 +106,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ text: reply, isDisclaimer: requiresDisclaimer });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
     const systemInstruction = `
 You are MindPilot AI, a deeply empathetic AI Resilience Co-Pilot acting as a combined protective, nurturing Mother ("Mom") and a supportive, encouraging, down-to-earth "Best Friend" for competitive exam aspirants.
 The student is preparing for ${profile.academic.examType} (Target Score: ${profile.academic.targetScore}).
@@ -133,6 +131,11 @@ Role Guidelines:
 5. Strict Length Constraint: Keep responses warm, encouraging, conversational, and under 3 short paragraphs.
 `;
 
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-flash-latest',
+      systemInstruction: systemInstruction,
+    });
+
     // format messages history for gemini API
     // Gemini chat API requires that history starts with a 'user' message.
     // We filter out any leading messages that are from the model (like the welcome message).
@@ -146,7 +149,6 @@ Role Guidelines:
 
     const chat = model.startChat({
       history: chatHistory,
-      systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] },
     });
 
     const response = await chat.sendMessage(latestUserMessage);
