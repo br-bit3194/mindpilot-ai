@@ -20,6 +20,20 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Photos
+
+The following photos are included in this project, sorted in increasing order of their creation time:
+
+- [photo_1.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_1.png)
+- [photo_2.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_2.png)
+- [photo_3.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_3.png)
+- [photo_4.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_4.png)
+- [photo_5.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_5.png)
+- [photo_6.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_6.png)
+- [photo_7.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_7.png)
+- [photo_8.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_8.png)
+- [photo_9.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_9.png)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
