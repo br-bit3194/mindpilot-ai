@@ -24,15 +24,15 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 The following photos are included in this project, sorted in increasing order of their creation time:
 
-- [photo_1.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_1.png)
-- [photo_2.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_2.png)
-- [photo_3.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_3.png)
-- [photo_4.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_4.png)
-- [photo_5.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_5.png)
-- [photo_6.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_6.png)
-- [photo_7.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_7.png)
-- [photo_8.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_8.png)
-- [photo_9.png](file:///d:/Hackathons/2026/MainChallengePromptWarsHack2skill/photos/photo_9.png)
+![photo_1](./photos/photo_1.png)
+![photo_2](./photos/photo_2.png)
+![photo_3](./photos/photo_3.png)
+![photo_4](./photos/photo_4.png)
+![photo_5](./photos/photo_5.png)
+![photo_6](./photos/photo_6.png)
+![photo_7](./photos/photo_7.png)
+![photo_8](./photos/photo_8.png)
+![photo_9](./photos/photo_9.png)
 
 ## Learn More
 
