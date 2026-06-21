@@ -6,6 +6,8 @@ import { useStudentData } from '@/hooks/useStudentData';
 import { ChatMessage } from '@/lib/types';
 import { MessageSquare, Send, Brain, User, AlertCircle, Sparkles, ShieldAlert, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import CrisisHelplineBanner from '@/components/shared/CrisisHelplineBanner';
+import { detectCrisisLanguage } from '@/lib/safety';
 
 // Split into a search parameter consumer and the shell wrapper to handle NextJS Suspense requirements
 function ChatInterface() {
@@ -17,6 +19,7 @@ function ChatInterface() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  const [showCrisisBanner, setShowCrisisBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize chat history with a welcome message from AI
@@ -48,6 +51,10 @@ function ChatInterface() {
   const handleSendMessage = async (textToSend?: string) => {
     const messageText = textToSend || inputMessage;
     if (!messageText.trim() || chatLoading || !profile || !mentalDNA) return;
+
+    if (detectCrisisLanguage(messageText)) {
+      setShowCrisisBanner(true);
+    }
 
     // Add user message
     const userMessage: ChatMessage = {
@@ -132,13 +139,39 @@ function ChatInterface() {
     );
   }
 
-  // Common quick prompt chips
-  const quickChips = [
-    "I'm feeling very anxious about today's physics score drop.",
-    "How do I manage studying 11 hours without burning out?",
-    "My parents are constantly comparing me with others. What should I do?",
-    "I need a 4-minute panic reset drill."
-  ];
+  // Dynamic prompt chips based on active stressors
+  const generateDynamicChips = () => {
+    const chips = ["I need a 4-minute panic reset drill."];
+    
+    if (profile?.academic?.studyHoursPerDay && profile.academic.studyHoursPerDay > 9) {
+      chips.push(`How do I manage studying ${profile.academic.studyHoursPerDay} hours without burning out?`);
+    } else {
+      chips.push("How do I maintain my focus rhythm without burning out?");
+    }
+
+    if (mentalDNA?.primaryStressors) {
+      if (mentalDNA.primaryStressors.includes('Parent Expectations') || mentalDNA.primaryStressors.includes('parent expectations')) {
+        chips.push("My parents are constantly putting pressure on me. What should I do?");
+      }
+      if (mentalDNA.primaryStressors.some(s => s.toLowerCase().includes('physics'))) {
+        chips.push(`I am feeling very anxious about my ${profile?.academic?.examType || 'exam'} Physics prep.`);
+      }
+      if (mentalDNA.primaryStressors.some(s => s.toLowerCase().includes('mock'))) {
+        chips.push("I had a score drop in my recent mock test. Can we talk about it?");
+      }
+      if (mentalDNA.primaryStressors.some(s => s.toLowerCase().includes('backlog'))) {
+        chips.push("My syllabus backlog is building up and making me panic.");
+      }
+    }
+    
+    // Fallback if chips are too few
+    if (chips.length < 3) {
+      chips.push(`How do I crack ${profile?.academic?.examType || 'exams'} while staying happy?`);
+    }
+    return chips;
+  };
+
+  const quickChips = generateDynamicChips();
 
   return (
     <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 max-h-[82vh] min-h-[500px]">
@@ -220,10 +253,16 @@ function ChatInterface() {
         </div>
 
         {/* Safety Disclaimer Banner */}
-        <div className="bg-error/10 border-b border-error/10 px-4 py-2 flex items-center gap-2 text-[11px] text-error font-medium">
-          <ShieldAlert size={14} className="shrink-0" />
-          <span>I am an AI wellness companion, not a medical professional. If in severe distress, please seek human support.</span>
-        </div>
+        {showCrisisBanner ? (
+          <div className="p-3 bg-white/40 border-b border-card-border/40 backdrop-blur-md">
+            <CrisisHelplineBanner onDismiss={() => setShowCrisisBanner(false)} />
+          </div>
+        ) : (
+          <div className="bg-error/10 border-b border-error/10 px-4 py-2 flex items-center gap-2 text-[11px] text-error font-medium">
+            <ShieldAlert size={14} className="shrink-0" />
+            <span>I am an AI wellness companion, not a medical professional. If in severe distress, please seek human support.</span>
+          </div>
+        )}
 
         {/* Messages List Area */}
         <div 

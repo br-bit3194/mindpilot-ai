@@ -190,6 +190,20 @@ export function useStudentData() {
     setJustLeveledUp(false);
   };
 
+  const addXP = (amount: number) => {
+    const newXP = resilienceXP + amount;
+    const oldLevel = Math.floor(resilienceXP / 100) + 1;
+    const newLevel = Math.floor(newXP / 100) + 1;
+
+    if (newLevel > oldLevel) {
+      setShowLevelUp(true);
+      setJustLeveledUp(true);
+    }
+
+    localStorage.setItem('mindpilot-xp', String(newXP));
+    setResilienceXP(newXP);
+  };
+
   const dismissLevelUp = () => {
     setShowLevelUp(false);
     setJustLeveledUp(false);
@@ -213,6 +227,7 @@ export function useStudentData() {
     addCheckIn,
     toggleActionCompletion,
     resetToDemoMode,
-    dismissLevelUp
+    dismissLevelUp,
+    addXP
   };
 }

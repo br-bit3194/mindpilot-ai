@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DailyLogEntry } from '@/lib/types';
-import { Activity, ShieldCheck, TrendingUp, TrendingDown } from 'lucide-react';
+import { Sun, Cloud, CloudRain, Heart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FitnessScoreProps {
   history: DailyLogEntry[];
@@ -30,84 +31,172 @@ export default function FitnessScore({ history }: FitnessScoreProps) {
 
   const currentScore = calculateScore(latestEntry);
   const prevScore = calculateScore(prevEntry);
-  const diff = currentScore - prevScore;
+  const scoreDiff = currentScore - prevScore;
 
-  // SVG parameters
-  const radius = 50;
-  const stroke = 8;
-  const normalizedRadius = radius - stroke * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (currentScore / 100) * circumference;
+  // Let the user interactively change/sandbox the weather scene
+  const [sandboxWeather, setSandboxWeather] = useState<'sunny' | 'breezy' | 'rainy' | null>(null);
 
   const getScoreStatus = (score: number) => {
-    if (score >= 75) return { label: 'Optimal Focus', color: 'stroke-success text-success bg-success/10' };
-    if (score >= 50) return { label: 'Moderate Stress', color: 'stroke-warning text-warning bg-warning/10' };
-    return { label: 'High Overload', color: 'stroke-error text-error bg-error/10' };
+    if (score >= 75) return 'sunny';
+    if (score >= 50) return 'breezy';
+    return 'rainy';
   };
 
-  const status = getScoreStatus(currentScore);
+  const activeWeather = sandboxWeather || getScoreStatus(currentScore);
+
+  const weatherDetails = {
+    sunny: {
+      label: 'Sunny Day ☀️',
+      desc: 'Clear focus, warm energy. Enjoy your study blocks today!',
+      color: 'text-success bg-success/10 border-success/20',
+      bgColor: 'from-amber-500/10 via-transparent to-transparent',
+      Icon: Sun
+    },
+    breezy: {
+      label: 'Gentle Breeze 🌤️',
+      desc: 'A bit of cloudy stress. Take things one concept at a time.',
+      color: 'text-warning bg-warning/10 border-warning/20',
+      bgColor: 'from-sky-500/10 via-transparent to-transparent',
+      Icon: Cloud
+    },
+    rainy: {
+      label: 'Cozy Rain 🌧️',
+      desc: 'Things feel heavy. Take a warm rest, your health matters first.',
+      color: 'text-error bg-error/10 border-error/20',
+      bgColor: 'from-blue-500/10 via-transparent to-transparent',
+      Icon: CloudRain
+    }
+  };
+
+  const currentDetails = weatherDetails[activeWeather];
 
   return (
     <div 
-      className="glass-panel rounded-2xl p-6 flex items-center justify-between h-full"
-      aria-label="Mental fitness indicator score"
+      className={`glass-panel rounded-3xl p-6 flex flex-col justify-between h-full bg-gradient-to-br ${currentDetails.bgColor} to-transparent border border-card-border/80 transition-all duration-500`}
+      aria-label="Interactive Mind Weather Sandbox"
     >
-      <div className="flex-1">
+      <div>
         <span className="text-xs text-text-muted font-bold uppercase tracking-wider block mb-1">
-          Mental Fitness Score
-        </span>
-        <h2 className="text-2xl font-black text-foreground flex items-center gap-1.5 leading-none mb-2">
-          <Activity size={20} className={currentScore >= 50 ? (currentScore >= 75 ? 'text-success' : 'text-warning') : 'text-error'} />
-          {currentScore}%
-        </h2>
-        <span className="text-xs text-text-muted font-medium">
-          Status: <strong className="text-foreground">{status.label}</strong>
+          My Mind Weather
         </span>
         
-        {/* Trend Indicator */}
-        <div className="mt-3 flex items-center gap-1">
-          {diff > 0 ? (
-            <>
-              <span className="text-success bg-success/15 p-0.5 rounded-full"><TrendingUp size={12} /></span>
-              <span className="text-[10px] text-success font-medium">+{diff}% vs last check-in</span>
-            </>
-          ) : diff < 0 ? (
-            <>
-              <span className="text-error bg-error/15 p-0.5 rounded-full"><TrendingDown size={12} /></span>
-              <span className="text-[10px] text-error font-medium">{diff}% vs last check-in</span>
-            </>
-          ) : (
-            <span className="text-[10px] text-text-muted">Stable vs last check-in</span>
-          )}
+        <div className="flex items-center gap-4 mt-3">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${currentDetails.color}`}>
+            <currentDetails.Icon size={32} className="animate-pulse" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-foreground">
+              {currentDetails.label}
+            </h2>
+            <p className="text-xs text-text-muted mt-0.5">
+              {sandboxWeather ? 'Custom Sky Sandbox' : 'Current Vibe'}
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold text-foreground leading-relaxed mt-4">
+          {currentDetails.desc}
+        </p>
+
+        {/* Dynamic Animated Scene */}
+        <div className="h-28 mt-4 w-full bg-black/10 border border-card-border/30 rounded-2xl relative overflow-hidden flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {activeWeather === 'sunny' && (
+              <motion.div 
+                key="sunny"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {/* Sunrays */}
+                <motion.div 
+                  className="w-16 h-16 rounded-full bg-amber-500/20 absolute"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                />
+                <Sun size={40} className="text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+              </motion.div>
+            )}
+
+            {activeWeather === 'breezy' && (
+              <motion.div 
+                key="breezy"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {/* Floating clouds drifting back and forth */}
+                <motion.div
+                  animate={{ x: [-15, 15, -15] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Cloud size={44} className="text-sky-300/80" />
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeWeather === 'rainy' && (
+              <motion.div 
+                key="rainy"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex flex-col items-center justify-center"
+              >
+                <CloudRain size={40} className="text-blue-400" />
+                {/* Flowing animated droplets */}
+                <div className="flex gap-2.5 mt-2">
+                  <span className="w-1 h-3 bg-blue-400/60 rounded-full animate-bounce [animation-duration:0.6s]" />
+                  <span className="w-1 h-3 bg-blue-400/60 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.2s]" />
+                  <span className="w-1 h-3 bg-blue-400/60 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.4s]" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sandbox controls */}
+        <div className="flex items-center justify-between gap-1.5 mt-4 p-1.5 bg-white/3 border border-card-border/40 rounded-xl">
+          <span className="text-[9px] text-text-muted font-bold pl-1 uppercase">Adjust Sky:</span>
+          <div className="flex gap-1">
+            <button 
+              onClick={() => setSandboxWeather('sunny')} 
+              className={`p-1 px-2 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${activeWeather === 'sunny' ? 'bg-amber-500/20 text-amber-300' : 'text-text-muted hover:bg-white/5'}`}
+            >
+              ☀️ Sun
+            </button>
+            <button 
+              onClick={() => setSandboxWeather('breezy')} 
+              className={`p-1 px-2 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${activeWeather === 'breezy' ? 'bg-sky-500/20 text-sky-300' : 'text-text-muted hover:bg-white/5'}`}
+            >
+              🌤️ Breeze
+            </button>
+            <button 
+              onClick={() => setSandboxWeather('rainy')} 
+              className={`p-1 px-2 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${activeWeather === 'rainy' ? 'bg-blue-500/20 text-blue-300' : 'text-text-muted hover:bg-white/5'}`}
+            >
+              🌧️ Rain
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Radial Ring Gauge */}
-      <div className="relative flex items-center justify-center shrink-0 w-28 h-28" aria-hidden="true">
-        <svg className="w-full h-full transform -rotate-90">
-          <circle
-            className="stroke-white/5"
-            fill="transparent"
-            strokeWidth={stroke}
-            r={normalizedRadius}
-            cx={radius + stroke}
-            cy={radius + stroke}
-          />
-          <circle
-            className={`${status.color} transition-all duration-1000 ease-out`}
-            fill="transparent"
-            strokeWidth={stroke}
-            strokeDasharray={circumference + ' ' + circumference}
-            style={{ strokeDashoffset }}
-            r={normalizedRadius}
-            cx={radius + stroke}
-            cy={radius + stroke}
-          />
-        </svg>
-        <div className="absolute flex flex-col items-center justify-center">
-          <span className="text-xs font-black text-foreground">{currentScore}%</span>
-          <span className="text-[8px] uppercase font-bold text-text-muted tracking-wider">Fit</span>
-        </div>
+      <div className="border-t border-card-border/40 pt-3 mt-3 flex items-center justify-between text-[10px] text-text-muted font-bold">
+        <span className="flex items-center gap-1">
+          <Heart size={12} className="text-error" />
+          One step at a time
+        </span>
+        <span>
+          {scoreDiff > 0 ? (
+            <span className="text-success">🌤️ Mood lift since yesterday</span>
+          ) : scoreDiff < 0 ? (
+            <span className="text-warning">🌧️ Energy is slightly low today</span>
+          ) : (
+            <span>Stable weather</span>
+          )}
+        </span>
       </div>
     </div>
   );

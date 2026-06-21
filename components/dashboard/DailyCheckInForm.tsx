@@ -70,13 +70,10 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!journalEntry.trim()) {
-      setError("Please write or speak a journal entry to analyze stress triggers.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
+
+    const finalJournal = journalEntry.trim() || `Feeling ${mood} today.`;
 
     const checkInPayload: DailyCheckIn = {
       id: `checkin-${Date.now()}`,
@@ -86,7 +83,7 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
       stressLevel,
       sleepHours,
       studyHours,
-      journalEntry,
+      journalEntry: finalJournal,
       voiceNoteTranscription: transcription || undefined,
       mockTestScore: mockScore ? parseInt(mockScore) : undefined
     };
@@ -201,116 +198,126 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                   </div>
                 </div>
 
-                {/* Metrics Sliders */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Energy level */}
-                  <div className="bg-white/5 border border-card-border p-3.5 rounded-xl">
-                    <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                      <span className="text-text-muted">Energy Level</span>
-                      <span className="text-primary font-bold">{energyLevel}/10</span>
+                {/* Metrics Sliders (Collapsible for simple & non-tedious UI) */}
+                <details className="group bg-white/5 border border-card-border/40 rounded-2xl p-4 cursor-pointer outline-none">
+                  <summary className="text-xs font-bold text-text-muted select-none flex justify-between items-center outline-none">
+                    <span>Show Detailed Hours & Scores (Optional) ⚙️</span>
+                    <span className="text-[10px] text-primary group-open:hidden">Expand</span>
+                    <span className="text-[10px] text-primary hidden group-open:inline">Collapse</span>
+                  </summary>
+                  
+                  <div className="space-y-4 pt-4 cursor-default" onClick={(e) => e.stopPropagation()}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Energy level */}
+                      <div className="bg-white/5 border border-card-border p-3.5 rounded-xl">
+                        <div className="flex justify-between items-center text-xs font-semibold mb-2">
+                          <span className="text-text-muted">Energy Level</span>
+                          <span className="text-primary font-bold">{energyLevel}/10</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="1" 
+                          max="10" 
+                          value={energyLevel}
+                          onChange={(e) => setEnergyLevel(parseInt(e.target.value))}
+                          className="w-full accent-primary bg-slate-800 h-1.5 rounded cursor-pointer"
+                          aria-label="Energy level scale 1 to 10"
+                        />
+                      </div>
+
+                      {/* Stress Level */}
+                      <div className="bg-white/5 border border-card-border p-3.5 rounded-xl">
+                        <div className="flex justify-between items-center text-xs font-semibold mb-2">
+                          <span className="text-text-muted">Stress Level</span>
+                          <span className="text-secondary font-bold">{stressLevel}/10</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="1" 
+                          max="10" 
+                          value={stressLevel}
+                          onChange={(e) => setStressLevel(parseInt(e.target.value))}
+                          className="w-full accent-secondary bg-slate-800 h-1.5 rounded cursor-pointer"
+                          aria-label="Stress level scale 1 to 10"
+                        />
+                      </div>
                     </div>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="10" 
-                      value={energyLevel}
-                      onChange={(e) => setEnergyLevel(parseInt(e.target.value))}
-                      className="w-full accent-primary bg-slate-800 h-1.5 rounded"
-                      aria-label="Energy level scale 1 to 10"
-                    />
-                  </div>
 
-                  {/* Stress Level */}
-                  <div className="bg-white/5 border border-card-border p-3.5 rounded-xl">
-                    <div className="flex justify-between items-center text-xs font-semibold mb-2">
-                      <span className="text-text-muted">Stress Level</span>
-                      <span className="text-secondary font-bold">{stressLevel}/10</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Log Date */}
+                      <div className="bg-white/5 border border-card-border p-3 rounded-xl">
+                        <label htmlFor="checkin-date" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                          Log Date
+                        </label>
+                        <input 
+                          id="checkin-date"
+                          type="date" 
+                          value={logDate}
+                          onChange={(e) => setLogDate(e.target.value)}
+                          className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      {/* Sleep Hours */}
+                      <div className="bg-white/5 border border-card-border p-3 rounded-xl">
+                        <label htmlFor="checkin-sleep" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                          Sleep Hours
+                        </label>
+                        <input 
+                          id="checkin-sleep"
+                          type="number" 
+                          step="0.5" 
+                          min="0" 
+                          max="24"
+                          value={sleepHours}
+                          onChange={(e) => setSleepHours(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      {/* Study Hours */}
+                      <div className="bg-white/5 border border-card-border p-3 rounded-xl">
+                        <label htmlFor="checkin-study" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                          Study Hours
+                        </label>
+                        <input 
+                          id="checkin-study"
+                          type="number" 
+                          step="0.5" 
+                          min="0" 
+                          max="24"
+                          value={studyHours}
+                          onChange={(e) => setStudyHours(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      {/* Mock Score (Optional) */}
+                      <div className="bg-white/5 border border-card-border p-3 rounded-xl">
+                        <label htmlFor="checkin-mock-score" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
+                          Mock Score (Optional)
+                        </label>
+                        <input 
+                          id="checkin-mock-score"
+                          type="number" 
+                          placeholder="e.g. 210"
+                          value={mockScore}
+                          onChange={(e) => setMockScore(e.target.value)}
+                          className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
+                        />
+                      </div>
                     </div>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="10" 
-                      value={stressLevel}
-                      onChange={(e) => setStressLevel(parseInt(e.target.value))}
-                      className="w-full accent-secondary bg-slate-800 h-1.5 rounded"
-                      aria-label="Stress level scale 1 to 10"
-                    />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Log Date */}
-                  <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label htmlFor="checkin-date" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
-                      Log Date
-                    </label>
-                    <input 
-                      id="checkin-date"
-                      type="date" 
-                      value={logDate}
-                      onChange={(e) => setLogDate(e.target.value)}
-                      className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
-                      required
-                    />
-                  </div>
-
-                  {/* Sleep Hours */}
-                  <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label htmlFor="checkin-sleep" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
-                      Sleep Hours
-                    </label>
-                    <input 
-                      id="checkin-sleep"
-                      type="number" 
-                      step="0.5" 
-                      min="0" 
-                      max="24"
-                      value={sleepHours}
-                      onChange={(e) => setSleepHours(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
-                      required
-                    />
-                  </div>
-
-                  {/* Study Hours */}
-                  <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label htmlFor="checkin-study" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
-                      Study Hours
-                    </label>
-                    <input 
-                      id="checkin-study"
-                      type="number" 
-                      step="0.5" 
-                      min="0" 
-                      max="24"
-                      value={studyHours}
-                      onChange={(e) => setStudyHours(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
-                      required
-                    />
-                  </div>
-
-                  {/* Mock Score (Optional) */}
-                  <div className="bg-white/5 border border-card-border p-3 rounded-xl">
-                    <label htmlFor="checkin-mock-score" className="text-[10px] font-bold text-text-muted uppercase tracking-wider block mb-1">
-                      Mock Score (Optional)
-                    </label>
-                    <input 
-                      id="checkin-mock-score"
-                      type="number" 
-                      placeholder="e.g. 210"
-                      value={mockScore}
-                      onChange={(e) => setMockScore(e.target.value)}
-                      className="w-full bg-black/20 border border-card-border/80 text-sm rounded px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
-                    />
-                  </div>
-                </div>
+                </details>
 
                 {/* Journal & Audio */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label htmlFor="checkin-journal" className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                      Open Journal / Mental Logs
+                      Share reflection or log notes
                     </label>
                     
                     {/* Audio Recorder button */}
@@ -319,7 +326,7 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                         <button
                           type="button"
                           onClick={handleStopRecording}
-                          className="flex items-center gap-1.5 bg-error/20 hover:bg-error/30 text-error text-[10px] font-bold border border-error/30 px-2.5 py-1 rounded-full animate-pulse focus:outline-none"
+                          className="flex items-center gap-1.5 bg-error/20 hover:bg-error/30 text-error text-[10px] font-bold border border-error/30 px-2.5 py-1 rounded-full animate-pulse focus:outline-none cursor-pointer"
                         >
                           <Square size={10} />
                           Stop Rec ({recordingSeconds}s)
@@ -328,7 +335,7 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                         <button
                           type="button"
                           onClick={handleStartRecording}
-                          className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold border border-primary/20 px-2.5 py-1 rounded-full focus:outline-none"
+                          className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold border border-primary/20 px-2.5 py-1 rounded-full focus:outline-none cursor-pointer"
                         >
                           <Mic size={10} />
                           Voice Journal
@@ -336,16 +343,36 @@ export default function DailyCheckInForm({ profile, history, onCheckInCompleted 
                       )}
                     </div>
                   </div>
+
+                  {/* Quick Express tags to avoid typing */}
+                  <div className="flex flex-wrap gap-1.5 mb-2.5">
+                    {[
+                      "Good study flow 📖",
+                      "Physics backlog stress 📚",
+                      "Mock scores dropped 📉",
+                      "Exhausted/need rest 🔋",
+                      "Parent pressure 👨‍👩‍👦",
+                      "Pace is steady 😌"
+                    ].map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setJournalEntry(prev => prev ? `${prev}, ${tag}` : tag)}
+                        className="text-[10px] font-semibold bg-white/5 border border-card-border hover:bg-primary/15 hover:border-primary/30 text-text-muted hover:text-primary py-1 px-2.5 rounded-full cursor-pointer transition-all"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
                   
                   <textarea
                     id="checkin-journal"
                     rows={4}
-                    placeholder="Describe how your preparation went today. Are you struggling with backlogs? Is there mock test anxiety or parental pressure? Feel free to vent, MindPilot is secure and private..."
+                    placeholder="Describe how your preparation went today. Click a tag above or voice record to auto-fill (optional)..."
                     value={journalEntry}
                     onChange={(e) => setJournalEntry(e.target.value)}
                     className="w-full bg-black/20 border border-card-border text-sm rounded-xl p-3.5 focus:ring-1 focus:ring-primary focus:outline-none leading-relaxed text-foreground placeholder-text-muted/60"
                     aria-label="Open-ended mental journal entry text field"
-                    required
                   />
                   {transcription && (
                     <p className="text-[10px] text-success font-medium mt-1">

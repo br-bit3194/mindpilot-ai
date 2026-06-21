@@ -1,40 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090d16;
-  --foreground: #f1f5f9;
+  --background: linear-gradient(180deg, #d2ecff 0%, #eafcf1 100%);
+  --foreground: #0f172a;
   
-  --card-bg: rgba(15, 23, 42, 0.65);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(0, 0, 0, 0.06);
   
-  --primary: #6366f1; /* Indigo */
-  --primary-glow: rgba(99, 102, 241, 0.15);
-  --secondary: #a855f7; /* Purple */
-  --accent: #06b6d4; /* Cyan */
+  --primary: #059669; /* Serene Green */
+  --primary-glow: rgba(5, 150, 105, 0.1);
+  --secondary: #0284c7; /* Serene Blue */
+  --accent: #d97706; /* Cozy Sunset Amber */
   
-  --text-muted: #94a3b8;
+  --text-muted: #475569;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
 }
 
-/* Light mode overrides */
+/* Light mode overrides (also nature by default) */
 .light-mode {
-  --background: #f8fafc;
+  --background: linear-gradient(180deg, #d2ecff 0%, #eafcf1 100%);
   --foreground: #0f172a;
   
-  --card-bg: rgba(255, 255, 255, 0.75);
-  --card-border: rgba(0, 0, 0, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(0, 0, 0, 0.06);
   
-  --primary: #4f46e5;
-  --primary-glow: rgba(79, 70, 229, 0.1);
-  --secondary: #9333ea;
-  --accent: #0891b2;
+  --primary: #059669;
+  --primary-glow: rgba(5, 150, 105, 0.1);
+  --secondary: #0284c7;
+  --accent: #d97706;
   
-  --text-muted: #64748b;
-  --success: #059669;
-  --warning: #d97706;
-  --error: #dc2626;
+  --text-muted: #475569;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
 }
 
 /* High contrast mode overrides */
@@ -203,4 +203,59 @@ body {
 .high-contrast-mode .react-flow__edge-path {
   stroke: #ffffff !important;
   stroke-dasharray: 0 !important;
+}
+
+/* Agentic UI Mood variables overrides (Translucent daytime scenery overlays) */
+.mood-anxious {
+  --background: linear-gradient(180deg, rgba(224, 242, 254, 0.5) 0%, rgba(209, 250, 229, 0.5) 100%); /* Misty valley sage and sky blue */
+  --foreground: #064e3b;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(16, 185, 129, 0.15);
+  --primary: #10b981; /* Calm green */
+  --secondary: #0284c7; /* Sky blue */
+  --accent: #0d9488;
+  --text-muted: #374151;
+}
+
+.mood-exhausted {
+  --background: linear-gradient(180deg, rgba(254, 243, 199, 0.5) 0%, rgba(250, 232, 255, 0.5) 100%); /* Soothing twilight / warm sunset */
+  --foreground: #4c1d95;
+  --card-bg: rgba(255, 255, 255, 0.78);
+  --card-border: rgba(168, 85, 247, 0.15);
+  --primary: #8b5cf6; /* Lavender */
+  --secondary: #d97706; /* Sunset Amber */
+  --accent: #db2777;
+  --text-muted: #4b5563;
+}
+
+.mood-good {
+  --background: linear-gradient(180deg, rgba(186, 230, 253, 0.45) 0%, rgba(187, 247, 208, 0.45) 100%); /* Sunny sky and blooming emerald hills */
+  --foreground: #0369a1;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(14, 116, 144, 0.15);
+  --primary: #0284c7;
+  --secondary: #059669;
+  --accent: #4f46e5;
+  --text-muted: #334155;
+}
+
+.mood-neutral {
+  --background: linear-gradient(180deg, rgba(210, 236, 255, 0.55) 0%, rgba(234, 252, 241, 0.55) 100%); /* Serene default nature scenery */
+  --foreground: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --primary: #059669;
+  --secondary: #0284c7;
+  --accent: #d97706;
+  --text-muted: #475569;
+}
+
+/* Apply scenery photo background globally to the main shell wrapper */
+#app-root-shell {
+  background-image: var(--background), url('/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  transition: background-image 0.7s ease-in-out;
 }

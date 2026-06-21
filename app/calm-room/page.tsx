@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Compass, Eye, Heart, Volume2, VolumeX, Sparkles, Check, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, Compass, Eye, Heart, Volume2, VolumeX, Sparkles, Check, ArrowRight, ShieldCheck, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useStudentData } from '@/hooks/useStudentData';
 
 class AmbientSynthesizer {
   private ctx: AudioContext | null = null;
@@ -318,6 +319,7 @@ class AmbientSynthesizer {
 type BreathingPhase = 'inhale' | 'hold-in' | 'exhale' | 'hold-out';
 
 export default function CalmRoomPage() {
+  const { addXP } = useStudentData();
   // Breathing Trainer States
   const [breathingActive, setBreathingActive] = useState(false);
   const [phase, setPhase] = useState<BreathingPhase>('inhale');
@@ -354,8 +356,107 @@ export default function CalmRoomPage() {
   }, [isAudioPlaying, ambientTheme]);
  
   // Calm Mode Switcher
-  const [calmMode, setCalmMode] = useState<'mindful' | 'anger'>('mindful');
+  const [calmMode, setCalmMode] = useState<'mindful' | 'meditate' | 'anger'>('mindful');
   
+  // Meditation states
+  const [meditationActive, setMeditationActive] = useState(false);
+  const [activeSession, setActiveSession] = useState<'quick_calm' | 'anxiety_reset' | 'deep_focus' | 'sleep'>('quick_calm');
+  const [meditationTime, setMeditationTime] = useState(120); // default for quick_calm
+  const [meditationTotal, setMeditationTotal] = useState(120);
+  const [selectedExam, setSelectedExam] = useState<string>('jee');
+  const [meditationCompleted, setMeditationCompleted] = useState(false);
+
+  const SESSIONS = [
+    { id: 'quick_calm' as const, title: '2-Min Quick Calm', duration: 120, desc: 'Ideal before entering an exam hall. Lowers immediate flight-or-fight heart rate.', theme: 'from-teal-500 to-emerald-400' },
+    { id: 'anxiety_reset' as const, title: '5-Min Anxiety Reset', duration: 300, desc: 'For sudden panic, mock test shocks, or feeling overwhelmed by a tough topic.', theme: 'from-sky-500 to-indigo-400' },
+    { id: 'deep_focus' as const, title: '10-Min Deep Focus', duration: 600, desc: 'Prime your brain before starting a heavy problem-solving session.', theme: 'from-violet-500 to-purple-400' },
+    { id: 'sleep' as const, title: 'Sleep Meditation', duration: 900, desc: 'Calms brainwaves to transition into deep, memory-consolidating sleep cycles.', theme: 'from-slate-600 to-indigo-950' }
+  ];
+
+  const EXAMS_TIPS: Record<string, { name: string; stress: string; tips: string[] }> = {
+    jee: {
+      name: 'JEE (Main & Advanced)',
+      stress: 'Physics derivations & math problem pressure',
+      tips: [
+        '10-Min Deep Focus before Physics problem-solving sessions.',
+        '2-Min Quick Calm before entering the exam hall.',
+        '5-Min Anxiety Reset after negative mock test results.'
+      ]
+    },
+    neet: {
+      name: 'NEET (UG)',
+      stress: 'Vast Biology syllabus & memory overload',
+      tips: [
+        'Sleep Meditation consolidates Biology mnemonics overnight.',
+        'Deep Focus primes recall of taxonomy and organ systems.',
+        'Anxiety Reset between paper shifts (Chem → Bio).'
+      ]
+    },
+    upsc: {
+      name: 'UPSC (CSE)',
+      stress: 'Multi-year prep fatigue & current affairs overload',
+      tips: [
+        'Sleep Meditation critical after 12+ hour study days.',
+        'Deep Focus before Answer Writing practice sessions.',
+        'Anxiety Reset after negative Mains mock evaluations.'
+      ]
+    },
+    cat: {
+      name: 'CAT (MBA)',
+      stress: 'Time pressure & VARC section anxiety',
+      tips: [
+        'Quick Calm for time-pressure simulation in mock CATs.',
+        'Deep Focus before RC passage practice sets.',
+        'Box breathing lowers reactivity during tricky DI-LR sets.'
+      ]
+    },
+    gate: {
+      name: 'GATE',
+      stress: 'Technical depth & rank-list anxiety',
+      tips: [
+        '10-Min Deep Focus before core engineering subjects.',
+        'Quick Calm before mock GATE full-length tests.',
+        'Sleep Meditation for signal-processing memory consolidation.'
+      ]
+    },
+    cuet: {
+      name: 'CUET (UG)',
+      stress: 'Multi-domain syllabus & cutoff anxiety',
+      tips: [
+        'Anxiety Reset between domain subject shifts.',
+        'Quick Calm 2 minutes before the test server logs in.',
+        'Deep Focus before General Test reasoning sets.'
+      ]
+    }
+  };
+
+  useEffect(() => {
+    if (!meditationActive) return;
+
+    const interval = setInterval(() => {
+      setMeditationTime((prev) => {
+        if (prev <= 1) {
+          setMeditationActive(false);
+          setMeditationCompleted(true);
+          // Reward user +20 XP reactively for completing meditation
+          addXP(20);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [meditationActive]);
+
+  const selectMeditationSession = (id: 'quick_calm' | 'anxiety_reset' | 'deep_focus' | 'sleep', duration: number) => {
+    setMeditationActive(false);
+    setMeditationCompleted(false);
+    setActiveSession(id);
+    setMeditationTime(duration);
+    setMeditationTotal(duration);
+  };
+
   // Anger Cushion States
   const [angerTension, setAngerTension] = useState(100);
   const [punchesLanded, setPunchesLanded] = useState(0);
@@ -393,14 +494,8 @@ export default function CalmRoomPage() {
  
     if (newTension === 0) {
       setAngerSuccess(true);
-      // Reward +10 XP in local storage
-      try {
-        const currentXPStr = localStorage.getItem('mindpilot-xp') || '0';
-        const newXP = parseInt(currentXPStr) + 10;
-        localStorage.setItem('mindpilot-xp', String(newXP));
-      } catch (err) {
-        console.error(err);
-      }
+      // Reward +10 XP reactively
+      addXP(10);
     }
   };
  
@@ -489,12 +584,12 @@ export default function CalmRoomPage() {
       </div>
  
       {/* Calm Mode Selector Tabs */}
-      <div className="flex bg-white/5 p-1 rounded-2xl border border-card-border max-w-sm w-full mx-auto" role="tablist">
+      <div className="flex bg-white/5 p-1 rounded-2xl border border-card-border max-w-md w-full mx-auto" role="tablist">
         <button
           role="tab"
           aria-selected={calmMode === 'mindful'}
           onClick={() => setCalmMode('mindful')}
-          className={`flex-1 py-2 rounded-xl text-xs font-black transition-all focus:outline-none cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-[10px] sm:text-xs font-black transition-all focus:outline-none cursor-pointer ${
             calmMode === 'mindful' 
               ? 'bg-primary text-white shadow' 
               : 'text-text-muted hover:text-foreground'
@@ -504,9 +599,21 @@ export default function CalmRoomPage() {
         </button>
         <button
           role="tab"
+          aria-selected={calmMode === 'meditate'}
+          onClick={() => setCalmMode('meditate')}
+          className={`flex-1 py-2 rounded-xl text-[10px] sm:text-xs font-black transition-all focus:outline-none cursor-pointer ${
+            calmMode === 'meditate' 
+              ? 'bg-secondary text-white shadow' 
+              : 'text-text-muted hover:text-foreground hover:bg-white/5'
+          }`}
+        >
+          Meditation Hub 🌌
+        </button>
+        <button
+          role="tab"
           aria-selected={calmMode === 'anger'}
           onClick={() => setCalmMode('anger')}
-          className={`flex-1 py-2 rounded-xl text-xs font-black transition-all focus:outline-none cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-[10px] sm:text-xs font-black transition-all focus:outline-none cursor-pointer ${
             calmMode === 'anger' 
               ? 'bg-error text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
               : 'text-text-muted hover:text-foreground hover:bg-white/5'
@@ -516,8 +623,7 @@ export default function CalmRoomPage() {
         </button>
       </div>
  
-      {/* Dynamic Content: Mindfulness (Breathing/Grounding) vs Anger Release */}
-      {calmMode === 'mindful' ? (
+      {calmMode === 'mindful' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {/* Box Breathing */}
         <div className="glass-panel rounded-2xl p-6 flex flex-col items-center justify-between min-h-[360px]">
@@ -553,13 +659,13 @@ export default function CalmRoomPage() {
                 )}
               </AnimatePresence>
 
-              {/* Main Breathing Circle */}
+              {/* Main breathing circle */}
               <motion.div
-                className={`w-32 h-32 rounded-full border-2 flex flex-col items-center justify-center text-white select-none transition-colors duration-1000 ${
-                  breathingActive ? phaseDetails[phase].color : 'bg-slate-800 border-slate-700'
+                className={`w-28 h-28 rounded-full border-2 flex flex-col items-center justify-center transition-all text-white font-black shrink-0 ${
+                  breathingActive ? phaseDetails[phase].color : 'bg-white/5 border-card-border'
                 }`}
                 animate={{
-                  scale: breathingActive ? phaseDetails[phase].scale : 1,
+                  scale: breathingActive ? phaseDetails[phase].scale : 1.0,
                 }}
                 transition={{ duration: 4, ease: 'easeInOut' }}
               >
@@ -665,7 +771,8 @@ export default function CalmRoomPage() {
             ) : (
               <button
                 onClick={() => {
-                  alert("Grounding completed successfully. Take a deep breath! You are present. You are safe.");
+                  alert("Grounding completed successfully. Take a deep breath! You are present. You are safe. (+15 XP earned)");
+                  addXP(15);
                   setGroundingStep(0);
                   setGroundingInputs(['', '', '', '', '']);
                 }}
@@ -678,8 +785,140 @@ export default function CalmRoomPage() {
           </div>
         </div>
       </div>
-      ) : (
-        /* Anger Release Cushion Workspace */
+      )}
+
+      {calmMode === 'meditate' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
+          {/* Left panel: Session list */}
+          <div className="md:col-span-2 glass-panel rounded-2xl p-6 flex flex-col justify-between min-h-[400px]">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-secondary flex items-center gap-1.5">
+                  <Compass size={16} />
+                  Guided Audio Meditation Timers
+                </h2>
+                {meditationCompleted && (
+                  <span className="text-[10px] text-success font-bold bg-success/10 border border-success/20 px-2 py-0.5 rounded">
+                    Session Done! +20 XP
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-text-muted mb-6">
+                Select a context-based audio countdown timer block. Tap play to focus your brainwaves or quiet your flight-or-fight response.
+              </p>
+
+              {/* Session Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {SESSIONS.map((session) => (
+                  <button
+                    key={session.id}
+                    onClick={() => selectMeditationSession(session.id, session.duration)}
+                    className={`p-4 rounded-xl border text-left cursor-pointer transition-all ${
+                      activeSession === session.id
+                        ? 'bg-secondary/10 border-secondary'
+                        : 'bg-white/5 border-card-border hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="font-bold text-sm text-foreground flex items-center justify-between">
+                      <span>{session.title}</span>
+                      <span className="text-[10px] opacity-75 font-semibold">{(session.duration / 60)} min</span>
+                    </div>
+                    <p className="text-[10px] text-text-muted mt-1 leading-relaxed">{session.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Active Meditation Timer Display */}
+            <div className="mt-8 bg-white/5 border border-card-border rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <span className="text-[9px] uppercase font-black text-secondary tracking-widest block">Active Session</span>
+                <span className="text-sm font-bold text-foreground">
+                  {SESSIONS.find(s => s.id === activeSession)?.title}
+                </span>
+              </div>
+
+              {/* Big Timer */}
+              <div className="text-3xl font-black font-mono text-foreground tracking-wider">
+                {Math.floor(meditationTime / 60)}:{(meditationTime % 60).toString().padStart(2, '0')}
+              </div>
+
+              {/* Player Controls */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMeditationActive(!meditationActive)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    meditationActive
+                      ? 'bg-warning text-slate-900'
+                      : 'bg-gradient-to-r from-secondary to-primary text-white'
+                  }`}
+                >
+                  {meditationActive ? 'Pause' : 'Start Timer'}
+                </button>
+                <button
+                  onClick={() => selectMeditationSession(activeSession, meditationTotal)}
+                  className="bg-white/5 hover:bg-white/10 border border-card-border px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right panel: Exam Specific Coping Tips */}
+          <div className="md:col-span-1 glass-panel rounded-2xl p-6 flex flex-col justify-between min-h-[400px]">
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <Trophy size={16} />
+                Aspirant Coping Tips
+              </h2>
+              <p className="text-xs text-text-muted">
+                Select your target competitive exam to see personalized psychological tips.
+              </p>
+
+              {/* Dropdown Selector */}
+              <select
+                value={selectedExam}
+                onChange={(e) => setSelectedExam(e.target.value)}
+                className="w-full bg-white/5 border border-card-border text-foreground text-xs font-bold rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value="jee" className="bg-slate-900">JEE Prep Tips</option>
+                <option value="neet" className="bg-slate-900">NEET Prep Tips</option>
+                <option value="upsc" className="bg-slate-900">UPSC CSE Prep Tips</option>
+                <option value="cat" className="bg-slate-900">CAT Prep Tips</option>
+                <option value="gate" className="bg-slate-900">GATE Prep Tips</option>
+                <option value="cuet" className="bg-slate-900">CUET Prep Tips</option>
+              </select>
+
+              {/* Stress trigger and tips content */}
+              <div className="bg-white/5 border border-card-border rounded-xl p-4 space-y-3">
+                <div>
+                  <span className="text-[9px] uppercase font-black text-text-muted tracking-widest block">Primary stressor</span>
+                  <span className="text-xs font-bold text-error">{EXAMS_TIPS[selectedExam].stress}</span>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase font-black text-text-muted tracking-widest block">Mindfulness guidance</span>
+                  <ul className="space-y-1.5">
+                    {EXAMS_TIPS[selectedExam].tips.map((tip, idx) => (
+                      <li key={idx} className="text-[10px] text-text-muted leading-relaxed flex items-start gap-1">
+                        <span className="text-primary font-bold">•</span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-card-border/60 rounded-xl p-3.5 flex items-start gap-2 text-[10px] text-text-muted leading-relaxed">
+              <Compass size={14} className="text-secondary shrink-0 mt-0.5" />
+              <p>Tip: Practice these techniques regularly to build memory retention and clear spatial load in your pre-frontal cortex.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {calmMode === 'anger' && (
         <div className="glass-panel rounded-3xl p-6 md:p-8 w-full max-w-md mx-auto flex flex-col items-center justify-between min-h-[420px] animate-in fade-in duration-300 relative overflow-hidden border border-error/20 bg-gradient-to-tr from-error/[0.03] to-transparent">
           {/* Floating Impact text words overlay */}
           <div className="absolute inset-0 pointer-events-none">

@@ -41,9 +41,9 @@ export default function TodayInsight({ latestEntry }: TodayInsightProps) {
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-primary flex items-center gap-1.5 uppercase tracking-widest">
             <Sparkles size={14} className="text-secondary animate-pulse" />
-            Today's AI Insight
+            Today's Comfort Tip
           </span>
-          <span className="text-[10px] text-text-muted">Empathetic Analysis</span>
+          <span className="text-[10px] text-text-muted">Daily Cheer</span>
         </div>
         <p className="text-sm font-semibold text-foreground leading-relaxed">
           {insight}

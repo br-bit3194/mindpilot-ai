@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudentData } from '@/hooks/useStudentData';
 import FitnessScore from '@/components/dashboard/FitnessScore';
 import TodayInsight from '@/components/dashboard/TodayInsight';
-import StressConstellation from '@/components/dashboard/StressConstellation';
 import BurnoutRadar from '@/components/dashboard/BurnoutRadar';
 import MentalDNA from '@/components/dashboard/MentalDNA';
 import ActionPlan from '@/components/dashboard/ActionPlan';
 import DailyCheckInForm from '@/components/dashboard/DailyCheckInForm';
 import MomBestFriend from '@/components/dashboard/MomBestFriend';
-import StartupFeatures from '@/components/dashboard/StartupFeatures';
+import CrisisHelplineBanner from '@/components/shared/CrisisHelplineBanner';
+import { detectCrisisLanguage } from '@/lib/safety';
 import { getInterventionForStudent } from '@/lib/mockData';
 import { Activity, Sparkles, MessageSquare, Compass, ShieldAlert, Award, RefreshCw, AlertCircle, Gamepad2, Smile, Brain, Trophy } from 'lucide-react';
 import Link from 'next/link';
@@ -33,6 +33,8 @@ export default function DashboardPage() {
     toggleActionCompletion,
     resetToDemoMode,
   } = useStudentData();
+
+  const [dismissCrisis, setDismissCrisis] = useState(false);
  
   const router = useRouter();
  
@@ -67,39 +69,44 @@ export default function DashboardPage() {
   const diffTime = examDate.getTime() - Date.now();
   const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-  // Core configuration based on burnout risk
+  // Core configuration based on burnout risk (translated to supportive mind weather)
   const getCoreConfig = (risk: number) => {
     if (risk >= 65) {
       return {
-        color: 'from-error to-secondary shadow-[0_0_35px_rgba(239,68,68,0.4)] border-error/25',
+        color: 'from-error/60 to-secondary/60 shadow-[0_0_35px_rgba(239,68,68,0.3)] border-error/20',
         glowColor: 'bg-error animate-pulse',
-        status: 'Core Overload',
+        status: 'Needs Care 🌸',
         statusColor: 'text-error bg-error/10 border-error/20',
-        message: `Pilot, high workloads and backlog dread have pushed your mental core into critical overload. Let's hit the brakes. Try popping some stress bubbles in the Relax Room, or run a 4-minute box breathing block.`
+        message: `Hey Dev, it looks like things are feeling a bit heavy today. That is completely okay. Let's take a deep breath. No rush, no pressure—your well-being is the only thing that matters right now.`
       };
     }
     if (risk >= 40) {
       return {
-        color: 'from-warning to-primary shadow-[0_0_35px_rgba(245,158,11,0.3)] border-warning/25',
+        color: 'from-warning/60 to-primary/60 shadow-[0_0_35px_rgba(245,158,11,0.2)] border-warning/20',
         glowColor: 'bg-warning',
-        status: 'Core Watch',
+        status: 'Cloudy Pacing 🌤️',
         statusColor: 'text-warning bg-warning/10 border-warning/20',
-        message: `Pilot, mock score drops and backlog pressure are draining focus energy. Keep today's sessions under 9 hours, take screen-free resets, and avoid peer comparisons.`
+        message: `Hey Dev, keeping your routine balanced is key. Take regular small breaks today, drink a cup of tea, and remember to be kind to your mind.`
       };
     }
     return {
-      color: 'from-primary to-accent shadow-[0_0_35px_rgba(99,102,241,0.3)] border-primary/25',
+      color: 'from-primary/60 to-accent/60 shadow-[0_0_35px_rgba(99,102,241,0.2)] border-primary/20',
       glowColor: 'bg-success',
-      status: 'Stable Core',
+      status: 'Bright Flow ☀️',
       statusColor: 'text-success bg-success/10 border-success/20',
-      message: `Pilot, your focus rhythm is highly resilient. Your targets are perfectly balanced. Maintain your structured block rotations and write down today's victory logs!`
+      message: `Hey Dev, your mind feels bright and steady! Enjoy your study flow today, take comfortable breaks, and write down your small victories.`
     };
   };
 
   const core = getCoreConfig(burnoutRisk);
 
+  const isCrisisDetected = latestEntry ? detectCrisisLanguage(latestEntry.checkIn.journalEntry || '' + (latestEntry.checkIn.voiceNoteTranscription || '')) : false;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300" role="main">
+      {isCrisisDetected && !dismissCrisis && (
+        <CrisisHelplineBanner onDismiss={() => setDismissCrisis(true)} />
+      )}
       {/* Spectacular Centerpiece: Resilience Core Orb & Dialogue */}
       <div className="glass-panel rounded-3xl p-6 md:p-8 border border-card-border/80 flex flex-col lg:flex-row items-center gap-6 bg-gradient-to-r from-white/[0.02] via-transparent to-transparent">
         
@@ -124,7 +131,7 @@ export default function DashboardPage() {
         <div className="flex-1 space-y-4 text-center lg:text-left">
           <div>
             <h1 className="text-xl md:text-2xl font-black text-foreground flex items-center justify-center lg:justify-start gap-2">
-              Welcome back, {profile.name}! 🚀
+              Welcome back, {profile.name}! ✨
               <span className="text-xs text-text-muted font-bold">
                 {profile.academic.examType} Prep
               </span>
@@ -137,7 +144,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs font-black uppercase text-secondary tracking-wider flex items-center gap-1">
                   <Trophy size={12} className="text-warning animate-pulse" />
-                  Pilot Rank {resilienceLevel}
+                  Self-Care Stage {resilienceLevel}
                 </span>
                 <span className="text-[10px] text-text-muted flex items-center">({resilienceXP} XP total)</span>
               </div>
@@ -148,7 +155,7 @@ export default function DashboardPage() {
                 />
               </div>
               <span className="text-[10px] font-bold text-text-muted shrink-0">
-                {levelProgress}/100 XP to Level {resilienceLevel + 1}
+                {levelProgress}/100 XP to Stage {resilienceLevel + 1}
               </span>
             </div>
           </div>
@@ -177,7 +184,7 @@ export default function DashboardPage() {
               title="Open relaxation mini-games room to decompress"
             >
               <Gamepad2 size={14} />
-              Take a Play Break (Relax Games)
+              Play a Calming Game 🎮
             </Link>
 
             <button
@@ -206,24 +213,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Grid 2: Stress Constellation (Flow) & Burnout Radar (Chart) */}
+      {/* Grid 2: Burnout Radar, Mental DNA, & Action Plan */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 h-full">
-          <StressConstellation latestAnalysis={latestEntry?.analysis || null} />
-        </div>
         <div className="lg:col-span-1">
           <BurnoutRadar history={history} />
         </div>
-      </div>
 
-      {/* Grid 3: Mental DNA & Action Plan & Empathetic Companion Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mental DNA */}
         <div className="lg:col-span-1">
           <MentalDNA dna={mentalDNA} />
         </div>
 
-        {/* Action Plan */}
         <div className="lg:col-span-1">
           <ActionPlan 
             plan={intervention}
@@ -231,18 +230,10 @@ export default function DashboardPage() {
             onToggleAction={toggleActionCompletion}
           />
         </div>
-
-        {/* Startup Metrics & Parent Reassurance Report */}
-        <div className="lg:col-span-1">
-          <StartupFeatures 
-            latestEntry={latestEntry}
-            profile={profile}
-          />
-        </div>
       </div>
 
       {/* Quick Footer Links */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
         <Link 
           href="/calm-room" 
           className="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-white/5 transition-all text-xs font-semibold focus:ring-2 focus:ring-primary outline-none"
@@ -250,29 +241,7 @@ export default function DashboardPage() {
           <ShieldAlert size={20} className="text-error" />
           <div>
             <span className="block text-foreground">SOS Calm Room</span>
-            <span className="text-[10px] text-text-muted font-normal">Panic attacks & breathing guide</span>
-          </div>
-        </Link>
-
-        <Link 
-          href="/simulator" 
-          className="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-white/5 transition-all text-xs font-semibold focus:ring-2 focus:ring-primary outline-none"
-        >
-          <Compass size={20} className="text-accent" />
-          <div>
-            <span className="block text-foreground">Future Self Simulator</span>
-            <span className="text-[10px] text-text-muted font-normal">Visualize trajectory projections</span>
-          </div>
-        </Link>
-
-        <Link 
-          href="/replay" 
-          className="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-white/5 transition-all text-xs font-semibold focus:ring-2 focus:ring-primary outline-none"
-        >
-          <Award size={20} className="text-secondary" />
-          <div>
-            <span className="block text-foreground">Weekly Replay</span>
-            <span className="text-[10px] text-text-muted font-normal">Review key wins & stress trends</span>
+            <span className="text-[10px] text-text-muted font-normal">Panic attacks, breathing guide & mindfulness</span>
           </div>
         </Link>
 
@@ -283,7 +252,7 @@ export default function DashboardPage() {
           <Activity size={20} className="text-success" />
           <div>
             <span className="block text-foreground">Update Profile</span>
-            <span className="text-[10px] text-text-muted font-normal">Adjust exam date & goals</span>
+            <span className="text-[10px] text-text-muted font-normal">Adjust exam date, targets & habits</span>
           </div>
         </Link>
       </div>

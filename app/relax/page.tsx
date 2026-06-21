@@ -1,12 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, Sparkles, RefreshCw, Trophy, Brain, Heart, ArrowLeft, Sun, MessageSquare } from 'lucide-react';
+import { Gamepad2, Sparkles, RefreshCw, Trophy, Brain, Heart, ArrowLeft, Sun, MessageSquare, Tv, Camera, Cloud, Smile, Coffee, Flame, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useStudentData } from '@/hooks/useStudentData';
 
 export default function RelaxRoomPage() {
   const [activeTab, setActiveTab] = useState<'bubbles' | 'stack' | 'memory'>('bubbles');
+  const { addXP } = useStudentData();
+
+  const handleAddXp = (amount: number) => {
+    addXP(amount);
+  };
 
   // ==========================================
   // GAME 1: ZEN BUBBLE POPPER
@@ -55,22 +61,22 @@ export default function RelaxRoomPage() {
     return () => clearInterval(interval);
   }, [activeTab]);
 
-  // Drift bubbles upwards
+  // Drift bubbles upwards (Slower and calmer drift speed)
   useEffect(() => {
     if (activeTab !== 'bubbles') return;
 
     const interval = setInterval(() => {
       setBubbles((prev) => 
-        prev.map(b => ({ ...b, y: b.y - 1 }))
+        prev.map(b => ({ ...b, y: b.y - 0.18 }))
       );
-    }, 40);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [activeTab]);
 
   const handlePop = (id: number, text: string) => {
     setBubbles(prev => 
-      prev.map(b => b.id === id ? { ...b, popped: true } : b)
+      prev.filter(b => b.id !== id)
     );
     setPopCount(p => p + 1);
     setLastAffirmation(text);
@@ -153,18 +159,20 @@ export default function RelaxRoomPage() {
   // ==========================================
   // GAME 3: ZEN MEMORY MATCH
   // ==========================================
-  const initialCards = [
-    { id: 1, icon: Heart, type: 'heart', matched: false, flipped: false },
-    { id: 2, icon: Brain, type: 'brain', matched: false, flipped: false },
-    { id: 3, icon: Sun, type: 'sun', matched: false, flipped: false },
-    { id: 4, icon: Sparkles, type: 'sparkles', matched: false, flipped: false },
-    { id: 5, icon: Heart, type: 'heart', matched: false, flipped: false },
-    { id: 6, icon: Brain, type: 'brain', matched: false, flipped: false },
-    { id: 7, icon: Sun, type: 'sun', matched: false, flipped: false },
-    { id: 8, icon: Sparkles, type: 'sparkles', matched: false, flipped: false },
+  const iconPool = [
+    { icon: Heart, type: 'heart' },
+    { icon: Brain, type: 'brain' },
+    { icon: Sun, type: 'sun' },
+    { icon: Sparkles, type: 'sparkles' },
+    { icon: Cloud, type: 'cloud' },
+    { icon: Smile, type: 'smile' },
+    { icon: Coffee, type: 'coffee' },
+    { icon: Flame, type: 'flame' },
+    { icon: Compass, type: 'compass' },
+    { icon: Trophy, type: 'trophy' }
   ];
 
-  const [cards, setCards] = useState(initialCards);
+  const [cards, setCards] = useState<{ id: number; icon: any; type: string; matched: boolean; flipped: boolean }[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [memoryMatches, setMemoryMatches] = useState(0);
 
@@ -176,10 +184,34 @@ export default function RelaxRoomPage() {
   }, [activeTab]);
 
   const shuffleCards = () => {
-    const shuffled = [...initialCards]
-      .sort(() => Math.random() - 0.5)
-      .map(c => ({ ...c, id: Math.random() }));
-    setCards(shuffled);
+    // Fisher-Yates shuffle function
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    // Pick 4 random icons from the 10-icon pool using a true shuffle
+    const shuffledPool = shuffleArray(iconPool);
+    const chosenTypes = shuffledPool.slice(0, 4);
+    
+    // Duplicate to make 8 cards (4 pairs)
+    const cardDeck: any[] = [];
+    chosenTypes.forEach((item, index) => {
+      cardDeck.push({ id: index * 2, icon: item.icon, type: item.type, matched: false, flipped: false });
+      cardDeck.push({ id: index * 2 + 1, icon: item.icon, type: item.type, matched: false, flipped: false });
+    });
+    
+    // Shuffle the deck completely
+    const shuffledDeck = shuffleArray(cardDeck).map(c => ({
+      ...c,
+      id: Math.random() // Unique random id key to force React re-render
+    }));
+      
+    setCards(shuffledDeck);
     setSelectedCards([]);
     setMemoryMatches(0);
   };
@@ -239,15 +271,13 @@ export default function RelaxRoomPage() {
         >
           Return to Dashboard
         </Link>
-      </div>
-
-      {/* Tabs Selector */}
+      </div>      {/* Tabs Selector */}
       <div className="flex gap-2 bg-white/5 p-1 rounded-2xl border border-card-border w-fit mx-auto" role="tablist">
         <button
           role="tab"
           aria-selected={activeTab === 'bubbles'}
           onClick={() => setActiveTab('bubbles')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer ${
             activeTab === 'bubbles' 
               ? 'bg-primary text-white shadow-md' 
               : 'text-text-muted hover:text-foreground'
@@ -259,7 +289,7 @@ export default function RelaxRoomPage() {
           role="tab"
           aria-selected={activeTab === 'stack'}
           onClick={() => setActiveTab('stack')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer ${
             activeTab === 'stack' 
               ? 'bg-secondary text-white shadow-md' 
               : 'text-text-muted hover:text-foreground'
@@ -271,7 +301,7 @@ export default function RelaxRoomPage() {
           role="tab"
           aria-selected={activeTab === 'memory'}
           onClick={() => setActiveTab('memory')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none cursor-pointer ${
             activeTab === 'memory' 
               ? 'bg-accent text-white shadow-md' 
               : 'text-text-muted hover:text-foreground'
@@ -280,8 +310,6 @@ export default function RelaxRoomPage() {
           Zen Memory Match
         </button>
       </div>
-
-      {/* Game Areas */}
       <div className="min-h-[440px] flex flex-col justify-between">
         <AnimatePresence mode="wait">
           {/* GAME 1: ZEN BUBBLE POPPER */}
@@ -299,7 +327,7 @@ export default function RelaxRoomPage() {
               </div>
 
               {/* Bubble drifting canvas */}
-              <div className="absolute inset-0 z-0">
+              <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
                 {bubbles.map((bubble) => (
                   <button
                     key={bubble.id}
@@ -310,7 +338,7 @@ export default function RelaxRoomPage() {
                       width: `${bubble.size}px`,
                       height: `${bubble.size}px`
                     }}
-                    className="absolute rounded-full border-2 border-primary/20 bg-primary/10 backdrop-blur-[2px] shadow-[0_0_15px_rgba(99,102,241,0.2)] flex items-center justify-center cursor-pointer transition-transform hover:scale-105 select-none focus:outline-none"
+                    className="absolute rounded-full border-2 border-primary/20 bg-primary/10 backdrop-blur-[2px] shadow-[0_0_15px_rgba(99,102,241,0.2)] flex items-center justify-center cursor-pointer transition-transform hover:scale-105 select-none focus:outline-none pointer-events-auto z-20"
                   >
                     <span className="w-3 h-3 rounded-full bg-white/20 absolute top-2 left-2"></span>
                   </button>
@@ -477,6 +505,31 @@ export default function RelaxRoomPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Navigation shortcuts to separate Zen features */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <Link 
+          href="/zen-streams" 
+          className="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-white/5 transition-all text-xs font-semibold focus:ring-2 focus:ring-primary outline-none border border-secondary/20"
+        >
+          <Tv size={20} className="text-secondary shrink-0" />
+          <div className="text-left">
+            <span className="block text-foreground font-bold">Zen Streams 🎵</span>
+            <span className="text-[10px] text-text-muted font-normal block mt-0.5">Tune into relaxing lofi study rooms & nature sounds</span>
+          </div>
+        </Link>
+
+        <Link 
+          href="/zen-face-cam" 
+          className="glass-panel p-4 rounded-xl flex items-center gap-3 hover:bg-white/5 transition-all text-xs font-semibold focus:ring-2 focus:ring-primary outline-none border border-primary/20"
+        >
+          <Camera size={20} className="text-primary shrink-0" />
+          <div className="text-left">
+            <span className="block text-foreground font-bold">Zen Face Cam 🤳</span>
+            <span className="text-[10px] text-text-muted font-normal block mt-0.5">Funny filters & pick-and-eat mood upgrades</span>
+          </div>
+        </Link>
       </div>
     </div>
   );

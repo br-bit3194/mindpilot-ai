@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DailyLogEntry } from '@/lib/types';
-import { Heart, Coffee, ShieldAlert, Sparkles, Smile, MessageCircle } from 'lucide-react';
+import { Heart, Coffee, ShieldAlert, Sparkles, Smile, MessageCircle, Share2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStudentData } from '@/hooks/useStudentData';
 
@@ -11,9 +11,10 @@ interface MomBestFriendProps {
 }
 
 export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
-  const { profile } = useStudentData();
+  const { profile, history, addXP } = useStudentData();
   const [activePersona, setActivePersona] = useState<'mom' | 'friend'>('mom');
   const [interactiveAction, setInteractiveAction] = useState<string | null>(null);
+  const [copiedReport, setCopiedReport] = useState(false);
 
   const getMomMessage = () => {
     const name = profile?.name || 'Beta';
@@ -59,6 +60,68 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
     }
 
     return `Hey ${name}, physics backlog? Honestly, rotation mechanics is a beast. Don't sweat it too much, we'll break it down into micro-cheat sheets. Let's grab a virtual coffee and conquer it tomorrow. ☕`;
+  };
+
+  const generateParentReport = () => {
+    const exam = profile?.academic?.examType || 'Exam';
+    const name = profile?.name || 'Beta';
+    const dateStr = latestEntry ? latestEntry.checkIn.date : new Date().toISOString().split('T')[0];
+    
+    const totalDays = history.length;
+    let avgStress = 5;
+    let avgSleep = 7;
+    let avgStudy = 8;
+    
+    if (totalDays > 0) {
+      avgStress = history.reduce((sum, entry) => sum + entry.checkIn.stressLevel, 0) / totalDays;
+      avgSleep = history.reduce((sum, entry) => sum + entry.checkIn.sleepHours, 0) / totalDays;
+      avgStudy = history.reduce((sum, entry) => sum + entry.checkIn.studyHours, 0) / totalDays;
+    }
+    
+    let consistency = 85;
+    consistency -= Math.max(0, (avgStress - 3) * 4);
+    if (avgSleep < 6.5) {
+      consistency -= (6.5 - avgSleep) * 10;
+    } else if (avgSleep >= 7.5) {
+      consistency += 5;
+    }
+    consistency = Math.max(40, Math.min(100, Math.round(consistency)));
+
+    const focusSprints = Math.max(1, Math.round((latestEntry?.checkIn.studyHours ?? avgStudy) / 2.5));
+    
+    let statusText = 'Stable Progress';
+    let recommendation = `${name} is pacing well and has completed all daily targets.`;
+    
+    const latestStress = latestEntry ? latestEntry.checkIn.stressLevel : avgStress;
+    if (latestStress >= 7) {
+      statusText = 'Overloaded - Rest Advised';
+      recommendation = `${name} has completed today's concepts. To preserve retention, it is highly recommended that they rest and sleep by 10:30 PM tonight.`;
+    } else if (latestStress >= 4) {
+      statusText = 'On Track - Moderate Load';
+      recommendation = `${name} is preparing consistently. Encouraging regular short screen-free breaks will help sustain this pacing.`;
+    }
+
+    return `*MindPilot AI Academic Progress Report* 📊
+Date: ${dateStr}
+Student Status: Preparing for ${exam}
+
+Dear Parent, 
+${name} is preparing systematically. Here is the diagnostic feedback for today:
+• Consistency Rating: ${consistency}% (Strong Progress)
+• Focus Sprints Completed: ${focusSprints} blocks
+• Status: ${statusText}
+
+*Resiliency Recommendation*: ${recommendation}
+_MindPilot AI helps students build balanced routines to achieve peak exam scores._`;
+  };
+
+  const handleCopyReport = () => {
+    navigator.clipboard.writeText(generateParentReport());
+    setCopiedReport(true);
+    addXP(15);
+    setTimeout(() => {
+      setCopiedReport(false);
+    }, 2500);
   };
 
   const triggerAction = (actionType: string) => {
@@ -110,7 +173,7 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
         </div>
 
         {/* Message Bubble area */}
-        <div className="min-h-[110px] flex items-center justify-center p-3 rounded-2xl bg-white/2 border border-card-border/30 relative">
+        <div className="min-h-[145px] flex items-center justify-center p-3 rounded-2xl bg-white/2 border border-card-border/30 relative">
           <AnimatePresence mode="wait">
             {activePersona === 'mom' ? (
               <motion.div
@@ -119,12 +182,36 @@ export default function MomBestFriend({ latestEntry }: MomBestFriendProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.2 }}
-                className="text-center"
+                className="text-center w-full flex flex-col items-center justify-between h-full py-1"
               >
-                <span className="text-3xl block mb-2" aria-hidden="true">🥣</span>
-                <p className="text-xs font-semibold text-foreground italic leading-relaxed">
-                  "{getMomMessage()}"
-                </p>
+                <div>
+                  <span className="text-2xl block mb-1.5" aria-hidden="true">🥣</span>
+                  <p className="text-xs font-semibold text-foreground italic leading-relaxed px-2">
+                    "{getMomMessage()}"
+                  </p>
+                </div>
+                
+                <button
+                  onClick={handleCopyReport}
+                  className={`mt-4 px-3 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all focus:ring-2 outline-none ${
+                    copiedReport 
+                      ? 'bg-success/15 border border-success/30 text-success' 
+                      : 'bg-secondary/20 hover:bg-secondary/35 text-secondary border border-secondary/30'
+                  }`}
+                  title="Copy a progress report to reassure your parents and reduce study nagging"
+                >
+                  {copiedReport ? (
+                    <>
+                      <Check size={11} />
+                      Copied Reassurance Report!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 size={11} />
+                      Share Progress with Parents
+                    </>
+                  )}
+                </button>
               </motion.div>
             ) : (
               <motion.div

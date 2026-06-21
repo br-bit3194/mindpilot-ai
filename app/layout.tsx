@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   description: "A premium AI mental health companion specifically tailored for competitive exam aspirants (JEE, NEET, UPSC, CAT, GATE, CUET). Discover stress triggers, monitor burnout risk, and take control of your study journey.",
   keywords: "JEE preparation, NEET stress, UPSC burnout, GATE, CAT exam anxiety, mental health companion, exam stress tracker",
   authors: [{ name: "MindPilot AI Team" }],
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
