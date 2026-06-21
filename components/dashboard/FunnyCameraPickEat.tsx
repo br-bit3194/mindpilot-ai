@@ -47,16 +47,20 @@ export default function FunnyCameraPickEat({ onAddXp }: FunnyCameraPickEatProps)
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
       setCameraOn(true);
     } catch {
       setCameraError("Camera blocked — no worries, funny mode still works!");
       setCameraOn(false);
     }
   }, []);
+
+  // Bind the camera stream to the video element once it is mounted in the DOM
+  useEffect(() => {
+    if (cameraOn && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch((err) => console.error("Error playing video:", err));
+    }
+  }, [cameraOn]);
 
   useEffect(() => {
     if (phase === "idle" || phase === "done") stopCamera();
