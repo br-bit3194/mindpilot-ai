@@ -570,12 +570,12 @@ export default function CalmRoomPage() {
       aria-label="SOS Calm Room distraction free workspace"
     >
       {/* Calm Header */}
-      <div className="space-y-2">
+      <div className="glass-panel bg-white/70 border border-slate-200/50 p-5 rounded-3xl space-y-2 max-w-md w-full mx-auto shadow-md">
         <span className="text-xs font-bold text-error uppercase tracking-widest bg-error/10 border border-error/20 px-3 py-1 rounded-full flex items-center justify-center gap-1.5 w-fit mx-auto">
           <ShieldAlert size={14} className="animate-pulse" />
           SOS Calm Room Active
         </span>
-        <h1 className="text-2xl md:text-3xl font-black text-foreground">
+        <h1 className="text-2xl font-black text-foreground">
           Take a Resiliency Break
         </h1>
         <p className="text-xs text-text-muted max-w-md mx-auto leading-relaxed">
@@ -1021,15 +1021,15 @@ export default function CalmRoomPage() {
       )}
  
       {/* Audio Ambient and Navigation back */}
-      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-card-border p-4 rounded-xl">
+      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 glass-panel bg-white/70 border border-slate-200/50 p-4 rounded-2xl shadow-md">
         {/* Ambient audio synthesis */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsAudioPlaying(!isAudioPlaying)}
-            className={`p-2 rounded-lg border ${
+            className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
               isAudioPlaying 
-                ? 'bg-success/15 border-success/30 text-success' 
-                : 'bg-white/5 border-card-border text-text-muted hover:text-foreground'
+                ? 'bg-success/15 border-success/30 text-success font-bold' 
+                : 'bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-800 hover:bg-slate-100'
             } focus:outline-none`}
             title="Play calming background sounds"
             aria-label="Play calming background sounds"
@@ -1038,11 +1038,11 @@ export default function CalmRoomPage() {
           </button>
           
           <div className="text-left text-xs">
-            <span className="text-text-muted block font-semibold">Ambient Sound</span>
+            <span className="text-slate-500 block font-semibold">Ambient Sound</span>
             <select
               value={ambientTheme}
               onChange={(e) => setAmbientTheme(e.target.value as any)}
-              className="bg-white/10 hover:bg-white/20 text-foreground font-bold border border-card-border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer text-xs mt-1.5 transition-all block w-full"
+              className="bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer text-xs mt-1 transition-all block w-full"
               aria-label="Select ambient audio theme"
             >
               <option value="Ocean Waves" className="bg-white text-slate-800 font-semibold">Ocean Waves (Live Synthesized) 🌊</option>
