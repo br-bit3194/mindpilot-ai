@@ -267,7 +267,7 @@ export default function RelaxRoomPage() {
         </div>
         <Link
           href="/"
-          className="bg-slate-800 hover:bg-slate-700 text-foreground font-bold text-xs px-4 py-2 rounded-xl border border-card-border transition-all focus:ring-2 focus:ring-primary outline-none"
+          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md"
         >
           Return to Dashboard
         </Link>
@@ -350,7 +350,7 @@ export default function RelaxRoomPage() {
                 <span className="text-[10px] text-primary uppercase font-bold tracking-widest block mb-1">
                   Co-pilot Whisper
                 </span>
-                <p className="text-sm font-semibold text-foreground italic leading-relaxed">
+                <p className="text-sm font-semibold text-white italic leading-relaxed">
                   "{lastAffirmation}"
                 </p>
               </div>

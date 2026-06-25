@@ -189,7 +189,7 @@ export default function DashboardPage() {
 
             <button
               onClick={resetToDemoMode}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-text-muted hover:text-foreground text-xs font-bold px-4 py-2 rounded-xl border border-card-border transition-all focus:ring-2 focus:ring-primary outline-none cursor-pointer"
+              className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl border border-red-700 transition-all focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
               title="Reset storage to default pre-seeded JEE Student A parameters for testing"
               aria-label="Seed Demo Data"
             >

@@ -1042,19 +1042,19 @@ export default function CalmRoomPage() {
             <select
               value={ambientTheme}
               onChange={(e) => setAmbientTheme(e.target.value as any)}
-              className="bg-transparent text-foreground font-bold border-none focus:outline-none p-0 cursor-pointer"
+              className="bg-white/10 hover:bg-white/20 text-foreground font-bold border border-card-border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer text-xs mt-1.5 transition-all block w-full"
               aria-label="Select ambient audio theme"
             >
-              <option value="Ocean Waves" className="bg-slate-900">Ocean Waves (Live Synthesized) 🌊</option>
-              <option value="Rainfall" className="bg-slate-900">Rainfall (Live Synthesized) 🌧️</option>
-              <option value="Binaural Beats" className="bg-slate-900">Binaural Focus Beats (Theta Waves) 🧠</option>
+              <option value="Ocean Waves" className="bg-white text-slate-800 font-semibold">Ocean Waves (Live Synthesized) 🌊</option>
+              <option value="Rainfall" className="bg-white text-slate-800 font-semibold">Rainfall (Live Synthesized) 🌧️</option>
+              <option value="Binaural Beats" className="bg-white text-slate-800 font-semibold">Binaural Focus Beats (Theta Waves) 🧠</option>
             </select>
           </div>
         </div>
 
         <Link
           href="/"
-          className="bg-slate-800 hover:bg-slate-700 text-foreground font-bold text-xs px-5 py-2.5 rounded-xl border border-card-border focus:ring-2 focus:ring-primary outline-none"
+          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md"
         >
           Return to Dashboard
         </Link>

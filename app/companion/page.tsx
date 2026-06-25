@@ -229,7 +229,7 @@ function ChatInterface() {
       {/* Right Column: Conversational Workspace */}
       <div className="lg:col-span-3 glass-panel rounded-2xl flex flex-col justify-between overflow-hidden h-full">
         {/* Chat Header */}
-        <div className="bg-slate-900/35 border-b border-card-border px-4 py-3 flex items-center justify-between">
+        <div className="bg-white/40 border-b border-card-border px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Link href="/" className="lg:hidden text-text-muted hover:text-foreground mr-1" aria-label="Back to dashboard">
               <ArrowLeft size={18} />
@@ -290,7 +290,7 @@ function ChatInterface() {
                 <div className="space-y-1">
                   <div className={`p-3 rounded-2xl text-xs leading-relaxed border ${
                     isAI 
-                      ? 'bg-slate-800/60 border-card-border text-foreground rounded-tl-none' 
+                      ? 'bg-white/80 border border-slate-200/60 text-slate-800 rounded-tl-none shadow-sm' 
                       : 'bg-primary/15 border-primary/20 text-foreground rounded-tr-none'
                   }`}>
                     {msg.text.split('\n').map((para, i) => (
@@ -311,7 +311,7 @@ function ChatInterface() {
               <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white shrink-0" aria-hidden="true">
                 <Brain size={12} />
               </div>
-              <div className="bg-slate-800/60 border border-card-border p-3 rounded-2xl rounded-tl-none flex items-center gap-1.5" aria-label="AI is compiling insights">
+              <div className="bg-white/80 border border-slate-200/60 p-3 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm" aria-label="AI is compiling insights">
                 <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce"></span>
                 <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce [animation-delay:0.2s]"></span>
                 <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce [animation-delay:0.4s]"></span>
@@ -323,7 +323,7 @@ function ChatInterface() {
         </div>
 
         {/* Quick Suggestion Chips */}
-        <div className="px-4 py-2 border-t border-card-border bg-slate-900/10">
+        <div className="px-4 py-2 border-t border-card-border bg-white/20">
           <div className="flex items-center gap-1 text-[10px] text-text-muted mb-1.5 uppercase font-bold tracking-wider">
             <Sparkles size={10} className="text-secondary" />
             Quick resilience queries
@@ -342,14 +342,14 @@ function ChatInterface() {
         </div>
 
         {/* Input box */}
-        <div className="p-3 bg-slate-900/35 border-t border-card-border flex items-center gap-2">
+        <div className="p-3 bg-white/40 border-t border-card-border flex items-center gap-2">
           <textarea
             rows={1}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Talk to your resilience co-pilot..."
-            className="flex-1 bg-black/30 border border-card-border rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-none placeholder-text-muted/50 resize-none max-h-20"
+            className="flex-1 bg-white/90 border border-slate-200/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:ring-1 focus:ring-primary focus:outline-none placeholder-slate-400/80 resize-none max-h-20"
             aria-label="AI companion message text field"
           />
           <button
