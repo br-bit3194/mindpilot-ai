@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePomodoro, PomodoroMode } from '@/hooks/usePomodoro';
-import { Play, Square, Settings, Award, Flame, Coffee, Check, HelpCircle, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { Play, Square, Settings, Award, Flame, Coffee, Check, HelpCircle, X, ChevronUp, ChevronDown, Volume2, VolumeX } from 'lucide-react';
 
 export default function PomodoroWidget() {
   const {
@@ -12,6 +12,8 @@ export default function PomodoroWidget() {
     breakDuration,
     playCredits,
     dailyWarmupUsed,
+    isMuted,
+    toggleMute,
     startStudySession,
     stopSession,
     useDailyWarmup,
@@ -90,6 +92,15 @@ export default function PomodoroWidget() {
               <h3 className="text-xs font-black text-slate-800 tracking-wide">Focus Co-pilot</h3>
             </div>
             <div className="flex items-center gap-1">
+              {pomodoroMode === 'break' && (
+                <button
+                  onClick={toggleMute}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                  title={isMuted ? "Unmute Break Music" : "Mute Break Music"}
+                >
+                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} className="animate-pulse text-secondary" />}
+                </button>
+              )}
               <button
                 onClick={() => setShowSettings(!showSettings)}
                 className={`p-1.5 rounded-lg transition-all hover:bg-slate-100 cursor-pointer ${showSettings ? 'text-primary' : 'text-slate-400 hover:text-slate-700'}`}

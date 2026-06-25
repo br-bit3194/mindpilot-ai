@@ -11,6 +11,8 @@ interface PomodoroContextProps {
   breakDuration: number; // in minutes
   playCredits: number; // in seconds
   dailyWarmupUsed: boolean;
+  isMuted: boolean;
+  toggleMute: () => void;
   startStudySession: (studyMin?: number, breakMin?: number) => void;
   startBreakSession: () => void;
   stopSession: () => void;
@@ -28,9 +30,26 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const [breakDuration, setBreakDuration] = useState<number>(10);
   const [playCredits, setPlayCredits] = useState<number>(0);
   const [dailyWarmupUsed, setDailyWarmupUsed] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Initialize Audio with a soothing ambient lofi loop
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.20; // Played softly in background
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
 
   // Initialize state from localStorage
   useEffect(() => {
@@ -56,6 +75,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       if (diffSec > 0) {
         setPomodoroMode(savedMode);
         setTimeLeft(diffSec);
+        
+        // Start break song automatically if break was active
+        if (savedMode === 'break' && audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
       } else {
         // Timer expired while away
         if (savedMode === 'study') {
@@ -71,6 +95,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           const newCredits = existingCredits + breakSec;
           setPlayCredits(newCredits);
           localStorage.setItem('mindpilot-pomo-credits', String(newCredits));
+
+          // Play break song
+          if (audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
         } else {
           // Break finished
           setPomodoroMode('idle');
@@ -121,7 +150,12 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('mindpilot-pomo-mode', 'break');
           localStorage.setItem('mindpilot-pomo-endtime', String(Date.now() + breakSec * 1000));
           
-          // Play a serene chime sound
+          // Start the refreshing song automatically
+          if (audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
+
+          // Play a serene chime alert sound
           try {
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const osc = audioCtx.createOscillator();
@@ -143,6 +177,12 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           setTimeLeft(0);
           localStorage.setItem('mindpilot-pomo-mode', 'idle');
           localStorage.removeItem('mindpilot-pomo-endtime');
+          
+          // Stop the break song
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+          }
         }
       }
     }, 1000);
@@ -151,6 +191,16 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [pomodoroMode, breakDuration, mounted]);
+
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const next = !prev;
+      if (audioRef.current) {
+        audioRef.current.muted = next;
+      }
+      return next;
+    });
+  };
 
   const startStudySession = (studyMin: number = studyDuration, breakMin: number = breakDuration) => {
     const studySec = studyMin * 60;
@@ -166,6 +216,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     setTimeLeft(breakSec);
     localStorage.setItem('mindpilot-pomo-mode', 'break');
     localStorage.setItem('mindpilot-pomo-endtime', String(Date.now() + breakSec * 1000));
+
+    // Play break song automatically
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    }
   };
 
   const stopSession = () => {
@@ -174,6 +229,12 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('mindpilot-pomo-mode', 'idle');
     localStorage.removeItem('mindpilot-pomo-endtime');
     if (timerRef.current) clearInterval(timerRef.current);
+    
+    // Stop break song
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const deductPlayCredit = (seconds: number) => {
@@ -216,6 +277,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         breakDuration,
         playCredits,
         dailyWarmupUsed,
+        isMuted,
+        toggleMute,
         startStudySession,
         startBreakSession,
         stopSession,
