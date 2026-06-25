@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ClientShell from "@/components/shared/ClientShell";
+import { PomodoroProvider } from "@/hooks/usePomodoro";
 
 export const metadata: Metadata = {
   title: "MindPilot AI - Your Personal Mental Resilience Co-Pilot",
@@ -21,7 +22,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
-        <ClientShell>{children}</ClientShell>
+        <PomodoroProvider>
+          <ClientShell>{children}</ClientShell>
+        </PomodoroProvider>
       </body>
     </html>
   );

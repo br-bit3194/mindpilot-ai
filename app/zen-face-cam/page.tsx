@@ -1,17 +1,35 @@
 'use client';
 
-import React from 'react';
-import { Camera, ArrowLeft } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Camera, ArrowLeft, Brain } from 'lucide-react';
 import Link from 'next/link';
 import FunnyCameraPickEat from '@/components/dashboard/FunnyCameraPickEat';
 import { useStudentData } from '@/hooks/useStudentData';
+import { usePomodoro } from '@/hooks/usePomodoro';
 
 export default function ZenFaceCamPage() {
   const { addXP } = useStudentData();
+  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit } = usePomodoro();
+
+  // Deduct play credits when playing in idle mode
+  useEffect(() => {
+    if (pomodoroMode === 'study' || (pomodoroMode !== 'break' && playCredits <= 0)) {
+      return;
+    }
+    if (pomodoroMode === 'break') return;
+
+    const interval = setInterval(() => {
+      deductPlayCredit(1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [pomodoroMode, playCredits]);
 
   const handleAddXp = (amount: number) => {
     addXP(amount);
   };
+
+  const isLocked = pomodoroMode === 'study' || (pomodoroMode !== 'break' && playCredits <= 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto py-4" role="main" aria-label="Zen Face Cam Page">
@@ -28,14 +46,45 @@ export default function ZenFaceCamPage() {
         </div>
         <Link
           href="/"
-          className="bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none cursor-pointer"
+          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md shadow-primary/10"
         >
           Return to Dashboard
         </Link>
       </div>
 
-      <div className="w-full">
-        <FunnyCameraPickEat onAddXp={handleAddXp} />
+      <div className="relative">
+        {isLocked && (
+          <div className="absolute inset-0 z-30 backdrop-blur-md bg-slate-950/80 rounded-3xl border border-card-border/50 flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-4 animate-pulse">
+              <Brain size={28} />
+            </div>
+            
+            {pomodoroMode === 'study' ? (
+              <div className="space-y-3 max-w-sm">
+                <h2 className="text-lg font-black text-white">Focus Session Active 🔒</h2>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  You are currently in study focus mode. Face cam filter games will unlock when your break starts!
+                </p>
+                <div className="inline-block bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 mt-2">
+                  <span className="text-xs text-primary font-mono font-bold tracking-wider">
+                    Break starts in: {Math.floor(timeLeft / 60)}m {timeLeft % 60}s
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 max-w-sm">
+                <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Face cam interactions are limited to prevent exam distractions. Claim your Daily Warmup or start a Pomodoro Study Session to earn break play time!
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="w-full">
+          <FunnyCameraPickEat onAddXp={handleAddXp} />
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import { useStudentData } from '@/hooks/useStudentData';
+import PomodoroWidget from './PomodoroWidget';
 
 type Theme = 'dark' | 'light';
 type FontSize = 'normal' | 'large' | 'xlarge';
@@ -102,6 +103,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
               </div>
             )}
           </main>
+          {mounted && <PomodoroWidget />}
         </div>
       </div>
     </AccessibilityContext.Provider>

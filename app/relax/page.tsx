@@ -5,10 +5,26 @@ import { Gamepad2, Sparkles, RefreshCw, Trophy, Brain, Heart, ArrowLeft, Sun, Me
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useStudentData } from '@/hooks/useStudentData';
+import { usePomodoro } from '@/hooks/usePomodoro';
 
 export default function RelaxRoomPage() {
   const [activeTab, setActiveTab] = useState<'bubbles' | 'stack' | 'memory'>('bubbles');
   const { addXP } = useStudentData();
+  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit } = usePomodoro();
+
+  // Deduct play credits when actively playing in idle mode
+  useEffect(() => {
+    if (pomodoroMode === 'study' || (pomodoroMode !== 'break' && playCredits <= 0)) {
+      return;
+    }
+    if (pomodoroMode === 'break') return;
+
+    const interval = setInterval(() => {
+      deductPlayCredit(1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [pomodoroMode, playCredits]);
 
   const handleAddXp = (amount: number) => {
     addXP(amount);
@@ -267,12 +283,51 @@ export default function RelaxRoomPage() {
         </div>
         <Link
           href="/"
-          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md"
+          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md shadow-primary/10"
         >
           Return to Dashboard
         </Link>
-      </div>      {/* Tabs Selector */}
-      <div className="flex gap-2 bg-white/5 p-1 rounded-2xl border border-card-border w-fit mx-auto" role="tablist">
+      </div>
+
+      {/* Game Content Container */}
+      <div className="relative">
+        {(() => {
+          const isLocked = pomodoroMode === 'study' || (pomodoroMode !== 'break' && playCredits <= 0);
+          return isLocked && (
+            <div className="absolute inset-0 z-30 backdrop-blur-md bg-slate-950/80 rounded-3xl border border-card-border/50 flex flex-col items-center justify-center p-8 text-center min-h-[480px]">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-4 animate-pulse">
+                <Brain size={28} />
+              </div>
+              
+              {pomodoroMode === 'study' ? (
+                <div className="space-y-3 max-w-sm">
+                  <h2 className="text-lg font-black text-white">Focus Session Active 🔒</h2>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    You are currently in study focus mode. To keep your brain in rhythm, games will unlock when your break starts!
+                  </p>
+                  <div className="inline-block bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 mt-2">
+                    <span className="text-xs text-primary font-mono font-bold tracking-wider">
+                      Break starts in: {Math.floor(timeLeft / 60)}m {timeLeft % 60}s
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 max-w-sm">
+                  <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Games can become addictive during preparation. To play, claim your Daily 5m Warmup in the Focus Co-pilot widget, or start a Pomodoro Study Session to earn break time!
+                  </p>
+                  <div className="bg-white/5 border border-card-border/40 p-3 rounded-2xl text-[11px] text-text-muted mt-2">
+                    Complete a study session to earn game break credit.
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Tabs Selector */}
+        <div className="flex gap-2 bg-white/5 p-1 rounded-2xl border border-card-border w-fit mx-auto mb-6" role="tablist">
         <button
           role="tab"
           aria-selected={activeTab === 'bubbles'}
@@ -505,6 +560,8 @@ export default function RelaxRoomPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
       </div>
 
       {/* Navigation shortcuts to separate Zen features */}
