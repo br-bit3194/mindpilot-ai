@@ -4,6 +4,15 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 
 export type PomodoroMode = 'idle' | 'study' | 'break';
 
+export const MUSIC_TRACKS = {
+  'Forest Synth': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+  'Lofi Study': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+  'Ocean Waves': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+  'Binaural Beats': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+};
+
+export type MusicTrackKey = keyof typeof MUSIC_TRACKS;
+
 interface PomodoroContextProps {
   pomodoroMode: PomodoroMode;
   timeLeft: number; // in seconds
@@ -12,7 +21,9 @@ interface PomodoroContextProps {
   playCredits: number; // in seconds
   dailyWarmupUsed: boolean;
   isMuted: boolean;
+  breakMusicTrack: MusicTrackKey;
   toggleMute: () => void;
+  setBreakMusicTrack: (track: MusicTrackKey) => void;
   startStudySession: (studyMin?: number, breakMin?: number) => void;
   startBreakSession: () => void;
   stopSession: () => void;
@@ -31,18 +42,22 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const [playCredits, setPlayCredits] = useState<number>(0);
   const [dailyWarmupUsed, setDailyWarmupUsed] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [breakMusicTrack, setBreakMusicTrack] = useState<MusicTrackKey>('Forest Synth');
   const [mounted, setMounted] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Initialize Audio with a soothing ambient lofi loop
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Initialize Audio
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      audioRef.current = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
+      const savedTrack = localStorage.getItem('mindpilot-pomo-music') as MusicTrackKey;
+      const initialSrc = savedTrack && MUSIC_TRACKS[savedTrack] ? MUSIC_TRACKS[savedTrack] : MUSIC_TRACKS['Forest Synth'];
+      
+      audioRef.current = new Audio(initialSrc);
       audioRef.current.loop = true;
       audioRef.current.volume = 0.20; // Played softly in background
+      if (savedTrack) setBreakMusicTrack(savedTrack);
     }
     return () => {
       if (audioRef.current) {
@@ -50,6 +65,19 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, []);
+
+  // Update audio source when selected track changes
+  useEffect(() => {
+    if (!mounted || !audioRef.current) return;
+    
+    const wasPlaying = !audioRef.current.paused;
+    audioRef.current.src = MUSIC_TRACKS[breakMusicTrack];
+    localStorage.setItem('mindpilot-pomo-music', breakMusicTrack);
+    
+    if (wasPlaying && pomodoroMode === 'break') {
+      audioRef.current.play().catch(() => {});
+    }
+  }, [breakMusicTrack, mounted]);
 
   // Initialize state from localStorage
   useEffect(() => {
@@ -278,7 +306,9 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         playCredits,
         dailyWarmupUsed,
         isMuted,
+        breakMusicTrack,
         toggleMute,
+        setBreakMusicTrack,
         startStudySession,
         startBreakSession,
         stopSession,

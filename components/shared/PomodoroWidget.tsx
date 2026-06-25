@@ -14,6 +14,8 @@ export default function PomodoroWidget() {
     dailyWarmupUsed,
     isMuted,
     toggleMute,
+    breakMusicTrack,
+    setBreakMusicTrack,
     startStudySession,
     stopSession,
     useDailyWarmup,
@@ -120,8 +122,8 @@ export default function PomodoroWidget() {
           {showSettings ? (
             /* Settings Panel */
             <div className="space-y-4 py-2 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Select Session Rhythm</span>
               <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Select Session Rhythm</span>
                 <button
                   onClick={() => handlePresetSelect(30, 10)}
                   className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer ${
@@ -155,6 +157,21 @@ export default function PomodoroWidget() {
                   <span>Deep Focus Cycle</span>
                   <span className="text-[10px] opacity-80 font-mono">50m study / 15m break</span>
                 </button>
+              </div>
+
+              <div className="pt-3.5 border-t border-slate-100 space-y-2 text-left">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Break Music Track</span>
+                <select
+                  value={breakMusicTrack}
+                  onChange={(e) => setBreakMusicTrack(e.target.value as any)}
+                  className="w-full bg-slate-50 text-slate-700 font-bold border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer text-xs transition-all block"
+                  aria-label="Select break music track"
+                >
+                  <option value="Forest Synth">Calming Forest Synth 🌲</option>
+                  <option value="Lofi Study">Relaxing Lofi Study 🎵</option>
+                  <option value="Ocean Waves">Ocean Wave Synth 🌊</option>
+                  <option value="Binaural Beats">Binaural Focus Beats 🧠</option>
+                </select>
               </div>
             </div>
           ) : (
