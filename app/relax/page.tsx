@@ -281,12 +281,20 @@ export default function RelaxRoomPage() {
             Decompress your amygdala. Low-stress micro-games to reset focus, quiet racing thoughts, and clear exam anxiety.
           </p>
         </div>
-        <Link
-          href="/"
-          className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md shadow-primary/10"
-        >
-          Return to Dashboard
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          {playCredits > 0 && pomodoroMode !== 'study' && (
+            <div className="bg-secondary/10 border border-secondary/20 rounded-xl px-4 py-2 flex items-center gap-1.5 text-xs text-secondary font-bold select-none">
+              <span className="w-2 h-2 bg-secondary rounded-full animate-ping" />
+              Play Time Left: {Math.floor(playCredits / 60)}m {playCredits % 60}s
+            </div>
+          )}
+          <Link
+            href="/"
+            className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all focus:ring-2 focus:ring-primary outline-none shadow-md shadow-primary/10"
+          >
+            Return to Dashboard
+          </Link>
+        </div>
       </div>
 
       {/* Game Content Container */}
