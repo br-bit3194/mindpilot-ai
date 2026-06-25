@@ -122,12 +122,12 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
 
   return (
     <div className="space-y-6 w-full text-left">
-      <div>
+      <div className="glass-panel bg-white/70 border border-slate-200/50 p-5 rounded-3xl space-y-2 shadow-md w-full">
         <h2 className="text-xl font-extrabold text-foreground flex items-center gap-1.5">
           <Video className="text-primary w-5 h-5" />
           Stress Relief Library
         </h2>
-        <p className="text-xs text-text-muted mt-1">
+        <p className="text-xs text-text-muted mt-1 leading-relaxed">
           Curated videos to lower exam anxiety, improve sleep, and build exam-day confidence.
         </p>
       </div>
@@ -138,7 +138,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
           <div className="bg-black rounded-2xl overflow-hidden aspect-video shadow-lg border border-card-border relative">
             <div id="youtube-player" className="w-full h-full" />
           </div>
-          <div className="glass-panel border border-card-border rounded-2xl p-5 bg-white/5">
+          <div className="glass-panel bg-white/70 border border-slate-200/50 rounded-2xl p-5 shadow-md">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="font-bold text-sm text-foreground">
@@ -156,7 +156,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
               {selectedVideo.exams.map((exam) => (
                 <span
                   key={exam}
-                  className="text-[9px] font-bold bg-white/10 text-text-muted border border-card-border px-2 py-0.5 rounded-full"
+                  className="text-[9px] font-bold bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full"
                 >
                   {exam}
                 </span>
@@ -164,8 +164,8 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
             </div>
 
             {/* Watch Progress & Reward indicator */}
-            <div className="mt-4 p-3 rounded-xl border flex items-center justify-between text-xs transition-all bg-white/5 border-card-border">
-              <span className="text-text-muted font-semibold flex items-center gap-1">
+            <div className="mt-4 p-3 rounded-xl border flex items-center justify-between text-xs transition-all bg-slate-50 border-slate-200">
+              <span className="text-slate-600 font-semibold flex items-center gap-1">
                 <Sparkles size={14} className="text-warning animate-pulse" />
                 Automatic Reward:
               </span>
@@ -185,7 +185,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
 
         {/* Video list & filters */}
         <div className="space-y-4">
-          <div className="glass-panel border border-card-border rounded-2xl p-4 bg-white/5">
+          <div className="glass-panel bg-white/70 border border-slate-200/50 rounded-2xl p-4 shadow-md">
             <h4 className="text-[10px] font-black text-primary uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <Filter className="w-3.5 h-3.5" /> Filter by Exam
             </h4>
@@ -196,8 +196,8 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
                   onClick={() => setExamFilter(exam)}
                   className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                     examFilter === exam
-                      ? "bg-primary/20 border-primary text-primary"
-                      : "border-card-border text-text-muted hover:bg-white/5"
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
                   {exam}
@@ -206,7 +206,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
             </div>
           </div>
 
-          <div className="glass-panel border border-card-border rounded-2xl p-4 bg-white/5">
+          <div className="glass-panel bg-white/70 border border-slate-200/50 rounded-2xl p-4 shadow-md">
             <h4 className="text-[10px] font-black text-secondary uppercase tracking-wider mb-3">
               Category
             </h4>
@@ -217,8 +217,8 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
                   onClick={() => setCategoryFilter(cat.id)}
                   className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                     categoryFilter === cat.id
-                      ? "bg-secondary/20 border-secondary text-secondary"
-                      : "border-card-border text-text-muted hover:bg-white/5"
+                      ? "bg-secondary/10 border-secondary text-secondary"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
                   {cat.label}
@@ -234,8 +234,8 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
                 onClick={() => handleSelect(video)}
                 className={`w-full text-left p-3 rounded-xl border transition cursor-pointer ${
                   selectedVideo.id === video.id
-                    ? "bg-primary/10 border-primary"
-                    : "bg-white/5 border-card-border hover:bg-white/10"
+                    ? "bg-primary/10 border-primary font-bold text-slate-800"
+                    : "bg-white/70 border-slate-200/80 hover:bg-slate-50 text-slate-700 font-semibold"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
                     <Play className="w-3 h-3 fill-error" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-foreground truncate">
+                    <p className="text-xs font-bold truncate">
                       {video.title}
                     </p>
                     <p className="text-[9px] text-text-muted">{video.duration}</p>
@@ -256,7 +256,7 @@ export default function StressReliefVideos({ onAddXp }: StressReliefVideosProps)
             ))}
           </div>
 
-          <p className="text-[10px] text-text-muted text-center flex items-center justify-center gap-1 bg-white/5 border border-card-border py-2 rounded-xl">
+          <p className="text-[10px] text-slate-600 text-center flex items-center justify-center gap-1 bg-white/70 border border-slate-200/80 py-2 rounded-xl shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-warning" />
             {watched.size} videos watched · +75 XP each
           </p>
