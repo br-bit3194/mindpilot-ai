@@ -35,15 +35,15 @@ export default function PomodoroWidget() {
   };
 
   const getModeColor = () => {
-    if (pomodoroMode === 'study') return 'text-primary';
-    if (pomodoroMode === 'break') return 'text-secondary';
-    return 'text-text-muted';
+    if (pomodoroMode === 'study') return 'text-emerald-600 font-extrabold';
+    if (pomodoroMode === 'break') return 'text-sky-600 font-extrabold';
+    return 'text-slate-500 font-bold';
   };
 
   const getModeBg = () => {
-    if (pomodoroMode === 'study') return 'bg-primary/10 border-primary/20';
-    if (pomodoroMode === 'break') return 'bg-secondary/10 border-secondary/20';
-    return 'bg-white/5 border-card-border';
+    if (pomodoroMode === 'study') return 'bg-emerald-50 border-emerald-200/60';
+    if (pomodoroMode === 'break') return 'bg-sky-50 border-sky-200/60';
+    return 'bg-slate-50 border-slate-200/60';
   };
 
   const handlePresetSelect = (study: number, breakDur: number) => {
@@ -81,25 +81,25 @@ export default function PomodoroWidget() {
         </button>
       ) : (
         /* Expanded Controller Panel */
-        <div className="glass-panel w-80 rounded-3xl p-5 shadow-2xl relative border border-card-border overflow-hidden bg-slate-900/95 backdrop-blur-xl animate-in slide-in-from-bottom-5 fade-in duration-300">
+        <div className="glass-panel w-80 rounded-3xl p-5 shadow-2xl relative border border-slate-200/80 overflow-hidden bg-white/95 backdrop-blur-xl animate-in slide-in-from-bottom-5 fade-in duration-300">
           
           {/* Header */}
-          <div className="flex justify-between items-center mb-4 border-b border-card-border/40 pb-2">
+          <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
             <div className="flex items-center gap-1.5">
               <Flame size={16} className="text-amber-500 animate-pulse" />
-              <h3 className="text-xs font-black text-white tracking-wide">Focus Co-pilot</h3>
+              <h3 className="text-xs font-black text-slate-800 tracking-wide">Focus Co-pilot</h3>
             </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className={`p-1.5 rounded-lg transition-all hover:bg-white/10 ${showSettings ? 'text-primary' : 'text-text-muted'}`}
+                className={`p-1.5 rounded-lg transition-all hover:bg-slate-100 cursor-pointer ${showSettings ? 'text-primary' : 'text-slate-400 hover:text-slate-700'}`}
                 title="Timer Settings"
               >
                 <Settings size={14} />
               </button>
               <button
                 onClick={() => { setExpanded(false); setShowSettings(false); }}
-                className="p-1.5 rounded-lg text-text-muted hover:text-white transition-all hover:bg-white/10"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-all hover:bg-slate-100 cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -109,40 +109,40 @@ export default function PomodoroWidget() {
           {showSettings ? (
             /* Settings Panel */
             <div className="space-y-4 py-2 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Select Session Rhythm</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Select Session Rhythm</span>
               <div className="space-y-2">
                 <button
                   onClick={() => handlePresetSelect(30, 10)}
-                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all ${
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer ${
                     studyDuration === 30
                       ? 'bg-primary/10 border-primary text-primary font-bold'
-                      : 'bg-white/5 border-card-border text-foreground hover:bg-white/10'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
                   <span>Serene (Recommended)</span>
-                  <span className="text-[10px] opacity-80">30m study / 10m break</span>
+                  <span className="text-[10px] opacity-80 font-mono">30m study / 10m break</span>
                 </button>
                 <button
                   onClick={() => handlePresetSelect(25, 5)}
-                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all ${
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer ${
                     studyDuration === 25
                       ? 'bg-primary/10 border-primary text-primary font-bold'
-                      : 'bg-white/5 border-card-border text-foreground hover:bg-white/10'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
                   <span>Classic Pomodoro</span>
-                  <span className="text-[10px] opacity-80">25m study / 5m break</span>
+                  <span className="text-[10px] opacity-80 font-mono">25m study / 5m break</span>
                 </button>
                 <button
                   onClick={() => handlePresetSelect(50, 15)}
-                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all ${
+                  className={`w-full flex items-center justify-between text-xs px-3.5 py-2.5 rounded-xl border transition-all cursor-pointer ${
                     studyDuration === 50
                       ? 'bg-primary/10 border-primary text-primary font-bold'
-                      : 'bg-white/5 border-card-border text-foreground hover:bg-white/10'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
                   <span>Deep Focus Cycle</span>
-                  <span className="text-[10px] opacity-80">50m study / 15m break</span>
+                  <span className="text-[10px] opacity-80 font-mono">50m study / 15m break</span>
                 </button>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function PomodoroWidget() {
                 <span className={`text-[10px] font-black uppercase tracking-widest block mb-1 ${getModeColor()}`}>
                   {getStatusText()}
                 </span>
-                <span className="text-3xl font-black font-mono tracking-tight text-white block">
+                <span className="text-3xl font-black font-mono tracking-tight text-slate-800 block">
                   {formatTime(timeLeft || (pomodoroMode === 'idle' ? studyDuration * 60 : 0))}
                 </span>
               </div>
@@ -183,16 +183,16 @@ export default function PomodoroWidget() {
               </div>
 
               {/* Stats & Free Warmup */}
-              <div className="bg-white/5 border border-card-border/40 p-3.5 rounded-2xl space-y-2">
+              <div className="bg-slate-50/70 border border-slate-200/60 p-3.5 rounded-2xl space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-muted font-medium">Game Play Credits</span>
-                  <span className="text-secondary font-black">{Math.ceil(playCredits / 60)} mins</span>
+                  <span className="text-slate-600 font-semibold">Game Play Credits</span>
+                  <span className="text-sky-600 font-black">{Math.ceil(playCredits / 60)} mins</span>
                 </div>
 
                 {!dailyWarmupUsed && (
                   <button
                     onClick={handleWarmup}
-                    className="w-full flex items-center justify-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 text-[10px] font-bold py-2 rounded-xl transition-all cursor-pointer mt-1"
+                    className="w-full flex items-center justify-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/85 text-[10px] font-bold py-2 rounded-xl transition-all cursor-pointer mt-1"
                   >
                     <Award size={12} />
                     Claim 5m Daily Play Warmup 🎁
@@ -200,7 +200,7 @@ export default function PomodoroWidget() {
                 )}
               </div>
 
-              <div className="text-[9px] text-text-muted text-center leading-relaxed">
+              <div className="text-[9px] text-slate-500 text-center leading-relaxed">
                 {pomodoroMode === 'study'
                   ? '🔒 Games & Leisure rooms are currently locked to maximize focus rhythm.'
                   : '🔓 Complete focus sessions to earn relaxation break time.'}
