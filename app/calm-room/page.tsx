@@ -640,17 +640,13 @@ export default function CalmRoomPage() {
           </div>
 
           {/* Breathing Circle Container */}
-          <div className="flex-1 flex items-center justify-center min-h-[200px]">
+          <div className="flex-1 flex items-center justify-center min-h-[160px] sm:min-h-[200px]">
             <div className="relative flex items-center justify-center">
               {/* Outer Pulse */}
               <AnimatePresence>
                 {breathingActive && (
                   <motion.div
-                    className="absolute rounded-full border border-white/5 bg-white/2 shrink-0"
-                    style={{
-                      width: '180px',
-                      height: '180px',
-                    }}
+                    className="absolute rounded-full border border-white/5 bg-white/2 shrink-0 w-36 h-36 sm:w-44 sm:h-44"
                     animate={{
                       scale: phaseDetails[phase].scale * 1.15,
                     }}
@@ -661,7 +657,7 @@ export default function CalmRoomPage() {
 
               {/* Main breathing circle */}
               <motion.div
-                className={`w-28 h-28 rounded-full border-2 flex flex-col items-center justify-center transition-all text-white font-black shrink-0 ${
+                className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 flex flex-col items-center justify-center transition-all text-white font-black shrink-0 ${
                   breathingActive ? phaseDetails[phase].color : 'bg-white/5 border-card-border'
                 }`}
                 animate={{
@@ -671,11 +667,11 @@ export default function CalmRoomPage() {
               >
                 {breathingActive ? (
                   <>
-                    <span className="text-2xl font-black">{secondsRemaining}</span>
-                    <span className="text-[9px] uppercase tracking-wider font-semibold opacity-70 mt-1">Secs</span>
+                    <span className="text-xl sm:text-2xl font-black">{secondsRemaining}</span>
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-wider font-semibold opacity-70 mt-0.5 sm:mt-1">Secs</span>
                   </>
                 ) : (
-                  <Heart size={32} className="text-primary animate-pulse" />
+                  <Heart size={28} className="text-primary animate-pulse sm:w-8 sm:h-8" />
                 )}
               </motion.div>
             </div>
