@@ -93,6 +93,7 @@ export default function OnboardingPage() {
     };
 
     onboardStudent(profile, initialDNA);
+    localStorage.setItem('mindpilot-show-tour', 'true');
     router.push('/');
   };
 

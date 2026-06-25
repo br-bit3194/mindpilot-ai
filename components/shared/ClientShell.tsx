@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import { useStudentData } from '@/hooks/useStudentData';
 import PomodoroWidget from './PomodoroWidget';
+import GuidedTour from './GuidedTour';
 
 type Theme = 'dark' | 'light';
 type FontSize = 'normal' | 'large' | 'xlarge';
@@ -104,6 +105,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
             )}
           </main>
           {mounted && <PomodoroWidget />}
+          {mounted && <GuidedTour />}
         </div>
       </div>
     </AccessibilityContext.Provider>

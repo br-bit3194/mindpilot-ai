@@ -9,7 +9,7 @@ import { usePomodoro } from '@/hooks/usePomodoro';
 
 export default function ZenFaceCamPage() {
   const { addXP } = useStudentData();
-  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit } = usePomodoro();
+  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit, startStudySession, useDailyWarmup, dailyWarmupUsed } = usePomodoro();
 
   // Deduct play credits when playing in idle mode
   useEffect(() => {
@@ -75,8 +75,25 @@ export default function ZenFaceCamPage() {
               <div className="space-y-3 max-w-sm">
                 <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
                 <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                  Face cam interactions are limited to prevent exam distractions. Claim your Daily Warmup or start a Pomodoro Study Session to earn break play time!
+                  Face cam interactions are limited to prevent exam distractions. Claim your Daily 5m Warmup, or start a Pomodoro Study Focus Session to earn break play time!
                 </p>
+                
+                <div className="flex flex-col sm:flex-row gap-2 mt-4 justify-center">
+                  {!dailyWarmupUsed && (
+                    <button
+                      onClick={useDailyWarmup}
+                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-md shadow-amber-500/10"
+                    >
+                      Claim 5m Warmup 🎁
+                    </button>
+                  )}
+                  <button
+                    onClick={() => startStudySession(30, 10)}
+                    className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-md shadow-primary/10"
+                  >
+                    Start 30m Focus Session 📚
+                  </button>
+                </div>
               </div>
             )}
           </div>

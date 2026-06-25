@@ -10,7 +10,7 @@ import { usePomodoro } from '@/hooks/usePomodoro';
 export default function RelaxRoomPage() {
   const [activeTab, setActiveTab] = useState<'bubbles' | 'stack' | 'memory'>('bubbles');
   const { addXP } = useStudentData();
-  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit } = usePomodoro();
+  const { pomodoroMode, timeLeft, playCredits, deductPlayCredit, startStudySession, useDailyWarmup, dailyWarmupUsed } = usePomodoro();
 
   // Deduct play credits when actively playing in idle mode
   useEffect(() => {
@@ -315,10 +315,28 @@ export default function RelaxRoomPage() {
                 <div className="space-y-3 max-w-sm">
                   <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
                   <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                    Games can become addictive during preparation. To play, claim your Daily 5m Warmup in the Focus Co-pilot widget, or start a Pomodoro Study Session to earn break time!
+                    Games can become addictive during preparation. To play, claim your Daily 5m Warmup, or start a Pomodoro Study Focus Session to earn break play time!
                   </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 justify-center">
+                    {!dailyWarmupUsed && (
+                      <button
+                        onClick={useDailyWarmup}
+                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-md shadow-amber-500/10"
+                      >
+                        Claim 5m Warmup 🎁
+                      </button>
+                    )}
+                    <button
+                      onClick={() => startStudySession(30, 10)}
+                      className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-md shadow-primary/10"
+                    >
+                      Start 30m Focus Session 📚
+                    </button>
+                  </div>
+
                   <div className="bg-white/10 border border-card-border/40 p-3 rounded-2xl text-[11px] text-slate-300 font-medium mt-2">
-                    Complete a study session to earn game break credit.
+                    Complete study sessions to earn game break credits.
                   </div>
                 </div>
               )}
