@@ -62,10 +62,10 @@ export default function ZenFaceCamPage() {
             {pomodoroMode === 'study' ? (
               <div className="space-y-3 max-w-sm">
                 <h2 className="text-lg font-black text-white">Focus Session Active 🔒</h2>
-                <p className="text-xs text-text-muted leading-relaxed">
+                <p className="text-xs text-slate-200 leading-relaxed font-medium">
                   You are currently in study focus mode. Face cam filter games will unlock when your break starts!
                 </p>
-                <div className="inline-block bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 mt-2">
+                <div className="inline-block bg-primary/15 border border-primary/30 rounded-xl px-4 py-2 mt-2">
                   <span className="text-xs text-primary font-mono font-bold tracking-wider">
                     Break starts in: {Math.floor(timeLeft / 60)}m {timeLeft % 60}s
                   </span>
@@ -74,7 +74,7 @@ export default function ZenFaceCamPage() {
             ) : (
               <div className="space-y-3 max-w-sm">
                 <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
-                <p className="text-xs text-text-muted leading-relaxed">
+                <p className="text-xs text-slate-200 leading-relaxed font-medium">
                   Face cam interactions are limited to prevent exam distractions. Claim your Daily Warmup or start a Pomodoro Study Session to earn break play time!
                 </p>
               </div>

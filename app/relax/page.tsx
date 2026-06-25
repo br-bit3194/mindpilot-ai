@@ -302,10 +302,10 @@ export default function RelaxRoomPage() {
               {pomodoroMode === 'study' ? (
                 <div className="space-y-3 max-w-sm">
                   <h2 className="text-lg font-black text-white">Focus Session Active 🔒</h2>
-                  <p className="text-xs text-text-muted leading-relaxed">
+                  <p className="text-xs text-slate-200 leading-relaxed font-medium">
                     You are currently in study focus mode. To keep your brain in rhythm, games will unlock when your break starts!
                   </p>
-                  <div className="inline-block bg-primary/10 border border-primary/20 rounded-xl px-4 py-2 mt-2">
+                  <div className="inline-block bg-primary/15 border border-primary/30 rounded-xl px-4 py-2 mt-2">
                     <span className="text-xs text-primary font-mono font-bold tracking-wider">
                       Break starts in: {Math.floor(timeLeft / 60)}m {timeLeft % 60}s
                     </span>
@@ -314,10 +314,10 @@ export default function RelaxRoomPage() {
               ) : (
                 <div className="space-y-3 max-w-sm">
                   <h2 className="text-lg font-black text-white">Play Time Limits Active ⏳</h2>
-                  <p className="text-xs text-text-muted leading-relaxed">
+                  <p className="text-xs text-slate-200 leading-relaxed font-medium">
                     Games can become addictive during preparation. To play, claim your Daily 5m Warmup in the Focus Co-pilot widget, or start a Pomodoro Study Session to earn break time!
                   </p>
-                  <div className="bg-white/5 border border-card-border/40 p-3 rounded-2xl text-[11px] text-text-muted mt-2">
+                  <div className="bg-white/10 border border-card-border/40 p-3 rounded-2xl text-[11px] text-slate-300 font-medium mt-2">
                     Complete a study session to earn game break credit.
                   </div>
                 </div>
