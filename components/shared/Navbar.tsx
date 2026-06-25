@@ -27,7 +27,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: BrainCircuit },
-    { name: 'Onboarding', path: '/onboarding', icon: Calendar },
+    ...(profile ? [] : [{ name: 'Onboarding', path: '/onboarding', icon: Calendar }]),
     { name: 'AI Companion', path: '/companion', icon: MessageSquare },
     { name: 'Relax Room', path: '/relax', icon: Gamepad2 },
     { name: 'Zen Streams', path: '/zen-streams', icon: Tv },
