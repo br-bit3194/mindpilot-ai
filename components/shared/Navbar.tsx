@@ -17,13 +17,14 @@ import {
   Flame, 
   Trophy,
   Tv,
-  Camera
+  Camera,
+  HelpCircle
 } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { theme, highContrast, fontSize, toggleTheme, toggleHighContrast, setFontSize } = useAccessibility();
-  const { profile, resilienceXP, resilienceLevel, levelProgress, history, loading } = useStudentData();
+  const { profile, resilienceXP, resilienceLevel, levelProgress, history, loading, streak } = useStudentData();
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: BrainCircuit },
@@ -34,48 +35,10 @@ export default function Navbar() {
     { name: 'Zen Face Cam', path: '/zen-face-cam', icon: Camera },
     { name: 'Calm Room', path: '/calm-room', icon: ShieldAlert },
   ];
-
-  const getActiveStreak = () => {
-    if (history.length === 0) return 0;
-    const uniqueDates = history
-      .map((entry) => entry.checkIn.date)
-      .filter((dateStr, idx, self) => self.indexOf(dateStr) === idx)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-
-    if (uniqueDates.length === 0) return 0;
-
-    let currentStreak = 1;
-    for (let i = uniqueDates.length - 1; i > 0; i--) {
-      const current = new Date(uniqueDates[i]);
-      const prev = new Date(uniqueDates[i - 1]);
-      current.setHours(0, 0, 0, 0);
-      prev.setHours(0, 0, 0, 0);
-      
-      const diffTime = current.getTime() - prev.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        currentStreak++;
-      } else if (diffDays > 1) {
-        break;
-      }
-    }
-
-    const lastCheckInDate = new Date(uniqueDates[uniqueDates.length - 1]);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    lastCheckInDate.setHours(0, 0, 0, 0);
-    
-    const timeDiff = today.getTime() - lastCheckInDate.getTime();
-    const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
-
-    if (daysDiff > 1) {
-      return 0;
-    }
-    return currentStreak;
+  const triggerTour = () => {
+    const event = new CustomEvent('mindpilot-start-tour');
+    window.dispatchEvent(event);
   };
-
-  const streak = getActiveStreak();
 
   return (
     <>
@@ -165,6 +128,17 @@ export default function Navbar() {
 
         {/* Bottom Accessibility Toolbar & SOS */}
         <div className="space-y-4 border-t border-card-border/60 pt-4">
+          {/* Tour help button */}
+          <button
+            onClick={triggerTour}
+            className="flex items-center justify-center gap-2 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary py-2 rounded-xl text-xs font-black transition-all focus:ring-2 focus:ring-primary outline-none w-full text-center cursor-pointer"
+            title="Start Guided Tour"
+            aria-label="Start Guided Tour"
+          >
+            <HelpCircle size={15} />
+            Start Guided Tour
+          </button>
+          
           {/* Accessibility Settings Panel */}
           <div 
             className="flex items-center justify-between bg-white/5 p-2 rounded-xl border border-card-border"
@@ -237,6 +211,14 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={triggerTour}
+              className="p-1.5 rounded-md text-text-muted hover:text-foreground hover:bg-white/5"
+              title="Help Tour"
+              aria-label="Help Tour"
+            >
+              <HelpCircle size={15} />
+            </button>
             <button
               onClick={toggleTheme}
               className="p-1.5 rounded-md text-text-muted hover:text-foreground hover:bg-white/5"

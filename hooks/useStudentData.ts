@@ -212,6 +212,48 @@ export function useStudentData() {
   const resilienceLevel = Math.floor(resilienceXP / 100) + 1;
   const levelProgress = resilienceXP % 100;
 
+  const getActiveStreak = () => {
+    if (history.length === 0) return 0;
+    const uniqueDates = history
+      .map((entry) => entry.checkIn.date)
+      .filter((dateStr, idx, self) => self.indexOf(dateStr) === idx)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    if (uniqueDates.length === 0) return 0;
+
+    let currentStreak = 1;
+    for (let i = uniqueDates.length - 1; i > 0; i--) {
+      const current = new Date(uniqueDates[i]);
+      const prev = new Date(uniqueDates[i - 1]);
+      current.setHours(0, 0, 0, 0);
+      prev.setHours(0, 0, 0, 0);
+      
+      const diffTime = current.getTime() - prev.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        currentStreak++;
+      } else if (diffDays > 1) {
+        break;
+      }
+    }
+
+    const lastCheckInDate = new Date(uniqueDates[uniqueDates.length - 1]);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    lastCheckInDate.setHours(0, 0, 0, 0);
+    
+    const timeDiff = today.getTime() - lastCheckInDate.getTime();
+    const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+
+    if (daysDiff > 1) {
+      return 0;
+    }
+    return currentStreak;
+  };
+
+  const streak = getActiveStreak();
+
   return {
     profile,
     mentalDNA,
@@ -223,6 +265,7 @@ export function useStudentData() {
     showLevelUp,
     justLeveledUp,
     loading,
+    streak,
     onboardStudent,
     addCheckIn,
     toggleActionCompletion,
@@ -231,3 +274,4 @@ export function useStudentData() {
     addXP
   };
 }
+
